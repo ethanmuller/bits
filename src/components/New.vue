@@ -77,12 +77,15 @@ function setSizing() {
 }
 
 function touchMove(e) {
-  // if changed from last position, fire a touchStart
   const x = Math.floor(Math.floor(e.changedTouches[0].clientX - state.left)/state.elWidth*state.pxWidth)
   const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*state.pxHeight)
 
+  // if changed from last position, draw
   if (x !== lastX || y !== lastY) {
-    touchStart(e)
+    if (pget(x,y) === state.c) {
+      return
+    }
+    draw(x,y)
   }
 
   lastX = x
@@ -109,23 +112,26 @@ function touchStart(e) {
     return
   }
 
+  state.c = pget(x,y) === 1 ? 0 : 1
+
   draw(x,y)
+
+  lastX = x
+  lastY = y
 }
 
 function draw(x,y) {
-  if (state.px[y][x] !== state.c) {
-    playSound(x,y, true)
+    playSound(x,y, state.c)
     pset(x, y, state.c)
     state.socket.emit('pset', x, y, state.c)
-  }
 }
 
-function playSound(x,y,local) {
+function playSound(x,y) {
   if (!state.isAudioSetup) {
     setupAudio()
   }
 
-  synth.triggerAttackRelease(300 + y/state.pxHeight*600 + x/state.pxWidth * 600, "64n");
+  synth.triggerAttackRelease(y/state.pxHeight*600 + x/state.pxWidth * 600 + 900 * state.c, "64n");
 }
 
 onMounted(() => {
@@ -148,13 +154,17 @@ onMounted(() => {
   setSizing()
 
   window.addEventListener('resize', setSizing)
+
   state.socket.on('updateAll', (px) => {
     state.px = px
     drawFromPx()
-    synth2.triggerAttackRelease(500, "64n");
+    try {
+      synth2.triggerAttackRelease(500, "64n");
+    } catch(e) {
+    }
   })
   state.socket.on('updatePx', (x,y,c) => {
-    playSound(x,y, false)
+    playSound(x,y)
     pset(x,y,c)
     drawFromPx()
   })
@@ -195,7 +205,7 @@ function clear() {
 
 <template>
   <div class="wrapper">
-    <canvas ref="canvas" class="px-canvas" width="8" height="16" v-on:mousemove.prevent.disablePassive="handleMousemove" v-on:mousedown.prevent.disablePassive="handleMousedown" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
+    <canvas ref="canvas" class="px-canvas" width="8" height="16" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
     <div class="toolbar">
       <button @click="clear">🗳️</button>
     </div>
