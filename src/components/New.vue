@@ -67,10 +67,9 @@ function setupAudio(e) {
   state.isAudioSetup = true
 }
 
-function setSizing() {
+function calculateOffsetValues() {
   const rects = canvas.value.getClientRects()
   state.left = rects[0].left
-
   state.top = rects[0].top
   state.elWidth = rects[0].width
   state.elHeight = rects[0].height
@@ -151,9 +150,9 @@ onMounted(() => {
     }
   }
 
-  setSizing()
+  calculateOffsetValues()
 
-  window.addEventListener('resize', setSizing)
+  window.addEventListener('resize', calculateOffsetValues)
 
   state.socket.on('updateAll', (px) => {
     state.px = px
