@@ -88,6 +88,18 @@ function touchMove(e) {
   lastX = x
   lastY = y
 }
+
+function handleMousedown(e) {
+  const ev = e
+  ev.changedTouches = []
+  ev.changedTouches[0] = {}
+  ev.changedTouches[0].clientX = e.clientX
+  ev.changedTouches[0].clientY = e.clientY
+  touchStart(ev)
+}
+function handleMousemove(e) {
+}
+
 function touchStart(e) {
   const x = Math.floor(Math.floor(e.changedTouches[0].clientX - state.left)/state.elWidth*state.pxWidth)
   const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*state.pxHeight)
@@ -97,6 +109,10 @@ function touchStart(e) {
     return
   }
 
+  draw(x,y)
+}
+
+function draw(x,y) {
   if (state.px[y][x] !== state.c) {
     playSound(x,y, true)
     pset(x, y, state.c)
@@ -179,7 +195,7 @@ function clear() {
 
 <template>
   <div class="wrapper">
-    <canvas ref="canvas" class="px-canvas" width="8" height="16" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
+    <canvas ref="canvas" class="px-canvas" width="8" height="16" v-on:mousemove.prevent.disablePassive="handleMousemove" v-on:mousedown.prevent.disablePassive="handleMousedown" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
     <div class="toolbar">
       <button @click="clear">🗳️</button>
     </div>

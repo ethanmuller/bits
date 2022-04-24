@@ -7,6 +7,7 @@ const { createServer: createViteServer } = require('vite')
 const w = 8
 const h = 16
 let px
+const PORT = 3030
 
 function resetPx() {
   px = new Array(h)
@@ -46,6 +47,7 @@ async function createServer() {
   app.use(vite.middlewares)
 
   app.use('/', (req, res) => {
+    console.log('request')
     let template = fs.readFileSync(
       path.resolve(__dirname, 'index.html'),
       'utf-8'
@@ -54,7 +56,8 @@ async function createServer() {
   })
 
 
-  const server = app.listen(3000)
+  const server = app.listen(PORT)
+  console.log(`listening on port ${PORT}`)
   const io = socket(server, {
     // allowEIO3: true,
     // cors: {credentials: true, origin: 'http://localhost:3000'},
