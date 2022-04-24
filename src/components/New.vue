@@ -108,7 +108,7 @@ function touchStart(e) {
   const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*state.pxHeight)
 
   if (x < 0 || y < 0 ||
-    x >= 8 || y >= 16) {
+    x >= state.pxWidth || y >= state.pxWidth) {
     return
   }
 
@@ -205,7 +205,7 @@ function clear() {
 
 <template>
   <div class="wrapper">
-    <canvas ref="canvas" class="px-canvas" width="8" height="16" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
+    <canvas ref="canvas" class="px-canvas" width="9" height="15" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
     <div class="toolbar">
       <button @click="clear">🗳️</button>
     </div>
