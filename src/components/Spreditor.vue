@@ -3,6 +3,8 @@ import { reactive, ref, onMounted } from 'vue'
 import { io } from 'socket.io-client'
 import * as Tone from 'tone'
 
+const props = defineProps(['width', 'height'])
+
 const canvas = ref(null)
 
 let lastX, lastY
@@ -14,7 +16,6 @@ const state = reactive({
   top: null,
   elWidth: null,
   elHeight: null,
-  pxWidth: null,
   pxHeight: null,
   px: [],
   //canvas: null,
@@ -77,8 +78,8 @@ function setSizing() {
 }
 
 function touchMove(e) {
-  const x = Math.floor(Math.floor(e.changedTouches[0].clientX - state.left)/state.elWidth*state.pxWidth)
-  const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*state.pxHeight)
+  const x = Math.floor(Math.floor(e.changedTouches[0].clientX - state.left)/state.elWidth*props.width)
+  const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*props.height)
 
   // if changed from last position, draw
   if (x !== lastX || y !== lastY) {
@@ -104,12 +105,12 @@ function handleMousemove(e) {
 }
 
 function touchStart(e) {
-  const x = Math.floor(Math.floor(e.changedTouches[0].clientX - state.left)/state.elWidth*state.pxWidth)
-  const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*state.pxHeight)
+  const x = Math.floor(Math.floor(e.changedTouches[0].clientX - state.left)/state.elWidth*props.width)
+  const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*props.height)
 
   if (x < 0 || y < 0 ||
-    x >= 8 || y >= 16) {
-    return
+    x >= props.width || y >= props.height) {
+    //return
   }
 
   state.c = pget(x,y) === 1 ? 0 : 1
@@ -131,22 +132,18 @@ function playSound(x,y) {
     setupAudio()
   }
 
-  synth.triggerAttackRelease(y/state.pxHeight*600 + x/state.pxWidth * 600 + 900 * state.c, "64n");
+  synth.triggerAttackRelease(y/props.height*600 + x/props.width * 600 + 900 * state.c, "64n");
 }
 
 onMounted(() => {
-
   state.ctx = canvas.value.getContext('2d')
 
-  state.pxWidth = canvas.value.width
-  state.pxHeight = canvas.value.height
+  state.px = new Array(props.height)
 
-  state.px = new Array(state.pxHeight)
-
-  for (let y = 0; y < state.px.length; y++) {
+  for (let y = 0; y < props.height; y++) {
     state.px[y] = []
 
-    for (let x = 0; x < state.pxWidth; x++) {
+    for (let x = 0; x < props.width; x++) {
       state.px[y][x] = 0
     }
   }
@@ -184,11 +181,11 @@ function pset(x, y, c) {
 }
 
 function drawFromPx() {
-  state.ctx.clearRect(0, 0, state.pxWidth, state.pxHeight)
+  state.ctx.clearRect(0, 0, props.width, props.height)
   state.ctx.fillStyle = 'white'
 
   for (let y = 0; y < state.px.length; y++) {
-    for (let x = 0; x < state.pxWidth; x++) {
+    for (let x = 0; x < props.width; x++) {
       const v = state.px[y][x]
       if (v === 1) {
         state.ctx.fillRect(x,y,1,1)
@@ -205,7 +202,7 @@ function clear() {
 
 <template>
   <div class="wrapper">
-    <canvas ref="canvas" class="px-canvas" width="8" height="16" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
+    <canvas ref="canvas" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
     <div class="toolbar">
       <button @click="clear">🗳️</button>
     </div>
