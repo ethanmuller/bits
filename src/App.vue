@@ -1,9 +1,9 @@
 <script setup>
-import New from './components/New.vue'
+import Spreditor from './components/Spreditor.vue'
 </script>
 
 <template>
-    <New />
+    <Spreditor width="8" height="8" />
 </template>
 
 <style>
