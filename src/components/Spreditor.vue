@@ -118,23 +118,14 @@ function setupAudio(e) {
   state.isAudioSetup = true
 }
 
-function setSizing() {
-  const rects = pad.value.getClientRects()
-  state.left = rects[0].left
-
-  state.top = rects[0].top
-  state.elWidth = rects[0].width
-  state.elHeight = rects[0].height
-}
-
 function touchMove(e) {
   var rect = e.target.getBoundingClientRect();
 
   var tx = e.changedTouches[0].clientX - rect.left;
   var ty = e.changedTouches[0].clientY - rect.top;
 
-  const x = Math.floor(tx/rect.width*8)
-  const y = Math.floor(ty/rect.height*8)
+  const x = Math.floor(tx/rect.width*props.width)
+  const y = Math.floor(ty/rect.height*props.width)
 
   if (x < 0 || y < 0 ||
     x >= props.width || y >= props.height) {
@@ -171,12 +162,12 @@ function touchStart(e) {
   var tx = e.changedTouches[0].clientX - rect.left;
   var ty = e.changedTouches[0].clientY - rect.top;
 
-  const x = Math.floor(tx/rect.width*8)
-  const y = Math.floor(ty/rect.height*8)
+  const x = Math.floor(tx/rect.width*props.width)
+  const y = Math.floor(ty/rect.height*props.width)
 
   if (x < 0 || y < 0 ||
     x >= props.width || y >= props.height) {
-    //return
+    return
   }
 
   state.c = store.pget(x,y) === 1 ? 0 : 1
@@ -208,20 +199,17 @@ onMounted(() => {
   state.ctx = pad.value.getContext('2d')
 
   updateCanvas()
-  setSizing()
-
-  window.addEventListener('resize', setSizing)
 })
 
 function updateCanvas() {
   if (state && state.ctx) {
-    state.ctx.clearRect(0, 0, 8, 8)
+    state.ctx.clearRect(0, 0, props.width, props.width)
     state.ctx.fillStyle = 'white'
 
-    const panX = store.pan[0]*8
+    const panX = store.pan[0]*props.width
 
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < props.width; y++) {
+      for (let x = 0; x < props.width; x++) {
         const v = store.pget(x,y)
         if (v === 1) {
           state.ctx.fillRect(x,y,1,1)

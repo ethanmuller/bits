@@ -20,7 +20,7 @@ function createEmptyGrid(width, height) {
 export const usePxStore = defineStore('main', {
   state() {
     return {
-      px: createEmptyGrid(64, 64),
+      px: createEmptyGrid(81, 81),
       socket: io(),
       pan: [0, 0],
     }
@@ -30,7 +30,7 @@ export const usePxStore = defineStore('main', {
   actions: {
     pget(x, y) {
       if (this.px[y]) {
-        return this.px[y + this.pan[1]*8][x + this.pan[0]*8]
+        return this.px[y + this.pan[1]*9][x + this.pan[0]*9]
       } else {
         return 0
       }

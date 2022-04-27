@@ -4,8 +4,8 @@ const path = require('path')
 const express = require('express')
 const { createServer: createViteServer } = require('vite')
 
-const w = 64
-const h = 64
+const w = 89
+const h = 89
 let px
 const PORT = 3030
 

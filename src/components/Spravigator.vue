@@ -34,8 +34,13 @@ function touchStart(e) {
   var tx = e.changedTouches[0].clientX - rect.left;
   var ty = e.changedTouches[0].clientY - rect.top;
 
-  const x = Math.floor(tx/rect.width*8)
+  const x = Math.floor(tx/rect.width*9)
   const y = Math.floor(ty/rect.height*3)
+
+  if (x < 0 || y < 0 ||
+    x >= 9 || y >= 3) {
+    return
+  }
 
   store.setPan(x,y)
 
@@ -49,11 +54,11 @@ function touchMove(e) {
   var tx = e.changedTouches[0].clientX - rect.left;
   var ty = e.changedTouches[0].clientY - rect.top;
 
-  const x = Math.floor(tx/rect.width*8)
+  const x = Math.floor(tx/rect.width*9)
   const y = Math.floor(ty/rect.height*3)
 
   if (x < 0 || y < 0 ||
-    x >= 8 || y >= 3) {
+    x >= 9 || y >= 3) {
     return
   }
 
@@ -66,11 +71,11 @@ function touchMove(e) {
 }
 
 function updateCanvas() {
-  state.ctx.clearRect(0, 0, 64, 24)
+  state.ctx.clearRect(0, 0, 81, 27)
   state.ctx.fillStyle = 'white'
 
-  for (let y = 0; y < 24; y++) {
-    for (let x = 0; x < 64; x++) {
+  for (let y = 0; y < 27; y++) {
+    for (let x = 0; x < 81; x++) {
       const v = store.px[y][x]
       if (v === 1) {
         state.ctx.fillRect(x,y,1,1)
@@ -80,12 +85,12 @@ function updateCanvas() {
 
   state.ctx.globalCompositeOperation = 'destination-over'
   state.ctx.fillStyle = '#333'
-  state.ctx.fillRect(store.pan[0]*8, store.pan[1]*8, 8, 8)
+  state.ctx.fillRect(store.pan[0]*9, store.pan[1]*9, 9, 9)
 }
 </script>
 
 <template>
-  <canvas ref="nav" class="spravigator" width="64" height="24" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove">ok here</canvas>
+  <canvas ref="nav" class="spravigator" width="81" height="27" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove">ok here</canvas>
 </template>
 
 <style>
