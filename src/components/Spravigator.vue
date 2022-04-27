@@ -36,6 +36,7 @@ function touchStart(e) {
 
   const x = Math.floor(tx/rect.width*8)
   const y = Math.floor(ty/rect.height*3)
+
   store.setPan(x,y)
 
   state.lastX = x

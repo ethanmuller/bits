@@ -128,8 +128,13 @@ function setSizing() {
 }
 
 function touchMove(e) {
-  const x = Math.floor(Math.floor(e.changedTouches[0].clientX - state.left)/state.elWidth*props.width)
-  const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*props.height)
+  var rect = e.target.getBoundingClientRect();
+
+  var tx = e.changedTouches[0].clientX - rect.left;
+  var ty = e.changedTouches[0].clientY - rect.top;
+
+  const x = Math.floor(tx/rect.width*8)
+  const y = Math.floor(ty/rect.height*8)
 
   if (x < 0 || y < 0 ||
     x >= props.width || y >= props.height) {
@@ -161,8 +166,13 @@ function handleMousemove(e) {
 }
 
 function touchStart(e) {
-  const x = Math.floor(Math.floor(e.changedTouches[0].clientX - state.left)/state.elWidth*props.width)
-  const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*props.height)
+  var rect = e.target.getBoundingClientRect();
+
+  var tx = e.changedTouches[0].clientX - rect.left;
+  var ty = e.changedTouches[0].clientY - rect.top;
+
+  const x = Math.floor(tx/rect.width*8)
+  const y = Math.floor(ty/rect.height*8)
 
   if (x < 0 || y < 0 ||
     x >= props.width || y >= props.height) {
@@ -222,7 +232,10 @@ function updateCanvas() {
 }
 
 function clear() {
-  store.socket.emit('clear')
+  const shouldClear = confirm('Clear the whole board?')
+  if (shouldClear) {
+    store.socket.emit('clear')
+  }
 }
 
 </script>
@@ -240,7 +253,7 @@ function clear() {
 body {
     background: #000;
 
-    max-width: 38em;
+    max-width: 100vmin;
     margin: 0 auto;
 
     /* overflow: hidden; */
