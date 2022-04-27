@@ -1,7 +1,29 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
-import { io } from 'socket.io-client'
 import * as Tone from 'tone'
+import { usePxStore } from '../stores/PxStore.js'
+
+const store = usePxStore()
+
+store.socket.on('updateAll', (px) => {
+  store.px = px
+  drawFromPx()
+
+  try {
+    synth2.triggerAttackRelease(500, "64n");
+  } catch(e) {
+  }
+})
+store.socket.on('updatePx', (x,y,c) => {
+  playSound(x,y)
+  store.pset(x,y,c)
+  drawFromPx()
+})
+
+store.socket.emit('join', (px) => {
+  store.px = px
+  drawFromPx()
+})
 
 const props = defineProps(['width', 'height'])
 
@@ -22,7 +44,6 @@ const state = reactive({
   ctx: null,
   c: 1,
   isAudioSetup: false,
-  socket: io(),
 })
 
 function setupAudio(e) {
@@ -83,7 +104,7 @@ function touchMove(e) {
 
   // if changed from last position, draw
   if (x !== lastX || y !== lastY) {
-    if (pget(x,y) === state.c) {
+    if (store.pget(x,y) === state.c) {
       return
     }
     draw(x,y)
@@ -113,7 +134,7 @@ function touchStart(e) {
     //return
   }
 
-  state.c = pget(x,y) === 1 ? 0 : 1
+  state.c = store.pget(x,y) === 1 ? 0 : 1
 
   draw(x,y)
 
@@ -123,8 +144,9 @@ function touchStart(e) {
 
 function draw(x,y) {
     playSound(x,y, state.c)
-    pset(x, y, state.c)
-    state.socket.emit('pset', x, y, state.c)
+    store.pset(x, y, state.c)
+    store.socket.emit('pset', x, y, state.c)
+    drawFromPx()
 }
 
 function playSound(x,y) {
@@ -151,42 +173,15 @@ onMounted(() => {
   setSizing()
 
   window.addEventListener('resize', setSizing)
-
-  state.socket.on('updateAll', (px) => {
-    state.px = px
-    drawFromPx()
-    try {
-      synth2.triggerAttackRelease(500, "64n");
-    } catch(e) {
-    }
-  })
-  state.socket.on('updatePx', (x,y,c) => {
-    playSound(x,y)
-    pset(x,y,c)
-    drawFromPx()
-  })
-
-  state.socket.emit('join', (px) => {
-    state.px = px
-    drawFromPx()
-  })
 })
-
-function pget(x, y) {
-  return state.px[y][x]
-}
-function pset(x, y, c) {
-  state.px[y][x] = c
-  drawFromPx()
-}
 
 function drawFromPx() {
   state.ctx.clearRect(0, 0, props.width, props.height)
   state.ctx.fillStyle = 'white'
 
-  for (let y = 0; y < state.px.length; y++) {
+  for (let y = 0; y < props.height; y++) {
     for (let x = 0; x < props.width; x++) {
-      const v = state.px[y][x]
+      const v = store.px[y][x]
       if (v === 1) {
         state.ctx.fillRect(x,y,1,1)
       }
@@ -195,7 +190,7 @@ function drawFromPx() {
 }
 
 function clear() {
-  state.socket.emit('clear')
+  store.socket.emit('clear')
 }
 
 </script>
