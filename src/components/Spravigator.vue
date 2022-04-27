@@ -51,6 +51,11 @@ function touchMove(e) {
   const x = Math.floor(tx/rect.width*8)
   const y = Math.floor(ty/rect.height*3)
 
+  if (x < 0 || y < 0 ||
+    x >= 8 || y >= 3) {
+    return
+  }
+
   if (x !== state.lastX || y !== state.lastY) {
     store.setPan(x,y)
   }
