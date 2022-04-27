@@ -4,8 +4,8 @@ import Spravigator from './components/Spravigator.vue'
 </script>
 
 <template>
-    <Spreditor width="8" height="8" />
     <Spravigator />
+    <Spreditor width="8" height="8" />
 </template>
 
 <style>

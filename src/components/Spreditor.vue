@@ -5,33 +5,18 @@ import { usePxStore } from '../stores/PxStore.js'
 
 const store = usePxStore()
 
-store.socket.on('updateAll', (px) => {
-  store.px = px
-  drawFromPx()
-
-  try {
-    synth2.triggerAttackRelease(500, "64n");
-  } catch(e) {
-  }
-})
-store.socket.on('updatePx', (x,y,c) => {
-  playSound(x,y)
-  store.pset(x,y,c)
-  drawFromPx()
+store.$subscribe((mutation, s) => {
+  updateCanvas()
 })
 
-store.socket.emit('join', (px) => {
-  store.px = px
-  drawFromPx()
-})
+const pad = ref(null)
 
 const props = defineProps(['width', 'height'])
 
-const canvas = ref(null)
 
 let lastX, lastY
 
-let synth, synth2
+let synth, synth2, synth3
 
 const state = reactive({
   left: null,
@@ -44,6 +29,31 @@ const state = reactive({
   ctx: null,
   c: 1,
   isAudioSetup: false,
+})
+
+store.socket.on('updateAll', (px) => {
+  store.px = px
+  updateCanvas()
+
+  try {
+    synth2.triggerAttackRelease(500, "64n");
+  } catch(e) {
+  }
+})
+store.socket.on('updatePx', (x,y,c) => {
+  //playSound(x,y)
+
+  try {
+    synth3.triggerAttackRelease(500, "64n");
+  } catch(e) {
+  }
+  store.pset(x,y,c)
+  updateCanvas()
+})
+
+store.socket.emit('join', (px) => {
+  store.px = px
+  updateCanvas()
 })
 
 function setupAudio(e) {
@@ -85,12 +95,31 @@ function setupAudio(e) {
     },
   });
 
+  synth3 = new Tone.PolySynth().toDestination();
+  synth3.set({
+    oscillator: {
+      type: 'sine',
+    },
+    envelope: {
+      attack: 0,
+      decay: 0.01,
+      sustain: 0,
+      release: 0,
+    },
+    filter : {
+      Q: 2,
+      type : 'lowpass' ,
+      rolloff : -48,
+      frequency: 200,
+    },
+  });
+
 
   state.isAudioSetup = true
 }
 
 function setSizing() {
-  const rects = canvas.value.getClientRects()
+  const rects = pad.value.getClientRects()
   state.left = rects[0].left
 
   state.top = rects[0].top
@@ -101,6 +130,12 @@ function setSizing() {
 function touchMove(e) {
   const x = Math.floor(Math.floor(e.changedTouches[0].clientX - state.left)/state.elWidth*props.width)
   const y = Math.floor(Math.floor(e.changedTouches[0].clientY - state.top)/state.elHeight*props.height)
+
+  if (x < 0 || y < 0 ||
+    x >= props.width || y >= props.height) {
+    return
+  }
+
 
   // if changed from last position, draw
   if (x !== lastX || y !== lastY) {
@@ -143,10 +178,12 @@ function touchStart(e) {
 }
 
 function draw(x,y) {
+  const px = x + store.pan[0]*props.width
+  const py = y + store.pan[1]*props.height
     playSound(x,y, state.c)
-    store.pset(x, y, state.c)
-    store.socket.emit('pset', x, y, state.c)
-    drawFromPx()
+    store.pset(px, py, state.c)
+    store.socket.emit('pset', px, py, state.c)
+    updateCanvas()
 }
 
 function playSound(x,y) {
@@ -158,32 +195,27 @@ function playSound(x,y) {
 }
 
 onMounted(() => {
-  state.ctx = canvas.value.getContext('2d')
+  state.ctx = pad.value.getContext('2d')
 
-  state.px = new Array(props.height)
-
-  for (let y = 0; y < props.height; y++) {
-    state.px[y] = []
-
-    for (let x = 0; x < props.width; x++) {
-      state.px[y][x] = 0
-    }
-  }
-
+  updateCanvas()
   setSizing()
 
   window.addEventListener('resize', setSizing)
 })
 
-function drawFromPx() {
-  state.ctx.clearRect(0, 0, props.width, props.height)
-  state.ctx.fillStyle = 'white'
+function updateCanvas() {
+  if (state && state.ctx) {
+    state.ctx.clearRect(0, 0, 8, 8)
+    state.ctx.fillStyle = 'white'
 
-  for (let y = 0; y < props.height; y++) {
-    for (let x = 0; x < props.width; x++) {
-      const v = store.px[y][x]
-      if (v === 1) {
-        state.ctx.fillRect(x,y,1,1)
+    const panX = store.pan[0]*8
+
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const v = store.pget(x,y)
+        if (v === 1) {
+          state.ctx.fillRect(x,y,1,1)
+        }
       }
     }
   }
@@ -197,7 +229,7 @@ function clear() {
 
 <template>
   <div class="wrapper">
-    <canvas ref="canvas" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
+    <canvas ref="pad" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
     <div class="toolbar">
       <button @click="clear">🗳️</button>
     </div>
@@ -241,9 +273,9 @@ body {
 
 
 .px-canvas {
-  background: #111;
+  background: #333;
   width: 100%;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   margin: 0;
   image-rendering: pixelated;
 }
