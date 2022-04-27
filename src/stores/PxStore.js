@@ -22,14 +22,25 @@ export const usePxStore = defineStore('main', {
     return {
       px: createEmptyGrid(64, 64),
       socket: io(),
+      pan: [0, 0],
     }
   },
+  getters: {
+  },
   actions: {
+    pget(x, y) {
+      if (this.px[y]) {
+        return this.px[y + this.pan[1]*8][x + this.pan[0]*8]
+      } else {
+        return 0
+      }
+    },
     pset(x,y,c) {
       this.px[y][x] = c
     },
-    pget(x, y) {
-      return this.px[y][x]
+    setPan(x, y) {
+      this.pan[0] = x
+      this.pan[1] = y
     },
   },
 })
