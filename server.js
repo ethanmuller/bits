@@ -9,6 +9,8 @@ const h = 89
 let px
 const PORT = 3030
 
+let currentTheme = 'electric'
+
 function resetPx() {
   px = new Array(h)
 
@@ -68,7 +70,7 @@ async function createServer() {
     console.log(`join ${socket.id} @ ${new Date().toLocaleString()}`);
 
     socket.on("join", function (cb) {
-      cb(px)
+      cb({px, currentTheme})
     });
 
     socket.on("clear", function (cb) {
@@ -87,6 +89,11 @@ async function createServer() {
 
       resetPx()
       io.emit("updateAll", px);
+    });
+
+    socket.on("change theme", function (theme) {
+      currentTheme = theme
+      socket.broadcast.emit("theme changed", currentTheme);
     });
 
     socket.on("pset", function (x,y,c) {

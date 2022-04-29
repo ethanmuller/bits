@@ -4,6 +4,8 @@ import { usePxStore } from '../stores/PxStore.js'
 
 const store = usePxStore()
 
+const props = defineProps(['theme'])
+
 store.$subscribe((mutation, state) => {
   updateCanvas()
 })
@@ -71,8 +73,11 @@ function touchMove(e) {
 }
 
 function updateCanvas() {
+  const pxColor = store.themes[store.currentTheme].fg
+  const hlColor = store.themes[store.currentTheme].hl
+
   state.ctx.clearRect(0, 0, 81, 27)
-  state.ctx.fillStyle = 'white'
+  state.ctx.fillStyle = pxColor
 
   for (let y = 0; y < 27; y++) {
     for (let x = 0; x < 81; x++) {
@@ -84,18 +89,17 @@ function updateCanvas() {
   }
 
   state.ctx.globalCompositeOperation = 'destination-over'
-  state.ctx.fillStyle = '#333'
+  state.ctx.fillStyle = hlColor
   state.ctx.fillRect(store.pan[0]*9, store.pan[1]*9, 9, 9)
 }
 </script>
 
 <template>
-  <canvas ref="nav" class="spravigator" width="81" height="27" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove">ok here</canvas>
+  <canvas ref="nav" class="spravigator" width="81" height="27" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove" :style="{ background: store.themes[store.currentTheme].bg }"></canvas>
 </template>
 
 <style>
 .spravigator {
-  background: #222;
   width: 100%;
   image-rendering: pixelated;
   display: block;

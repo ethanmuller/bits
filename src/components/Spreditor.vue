@@ -11,7 +11,7 @@ store.$subscribe((mutation, s) => {
 
 const pad = ref(null)
 
-const props = defineProps(['width', 'height'])
+const props = defineProps(['width', 'height', 'theme'])
 
 
 let lastX, lastY
@@ -51,8 +51,10 @@ store.socket.on('updatePx', (x,y,c) => {
   updateCanvas()
 })
 
-store.socket.emit('join', (px) => {
-  store.px = px
+store.socket.emit('join', (data) => {
+  store.px = data.px
+  store.currentTheme = data.currentTheme
+  console.log(data)
   updateCanvas()
 })
 
@@ -203,8 +205,10 @@ onMounted(() => {
 
 function updateCanvas() {
   if (state && state.ctx) {
+    const pxColor = store.themes[store.currentTheme].fg
+
     state.ctx.clearRect(0, 0, props.width, props.width)
-    state.ctx.fillStyle = 'white'
+    state.ctx.fillStyle = pxColor
 
     const panX = store.pan[0]*props.width
 
@@ -219,45 +223,15 @@ function updateCanvas() {
   }
 }
 
-function clear() {
-  const shouldClear = confirm('Clear the whole board?')
-  if (shouldClear) {
-    store.socket.emit('clear')
-  }
-}
-
 </script>
 
 <template>
   <div class="wrapper">
-    <canvas ref="pad" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove"></canvas>
-    <div class="toolbar">
-      <button @click="clear">🗳️</button>
-    </div>
+    <canvas ref="pad" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
   </div>
 </template>
 
 <style>
-body {
-    background: #000;
-
-    max-width: 100vmin;
-    margin: 0 auto;
-
-    /* overflow: hidden; */
-    flex-direction: column;
-    justify-content: flex-start;
-
-
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-    -khtml-user-select: none; /* Konqueror HTML */
-    -moz-user-select: none; /* Old versions of Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-    user-select: none; /* Non-prefixed version, currently
-    supported by Chrome, Edge, Opera and Firefox */
-
-}
 
 .wrapper {
   display: flex;
@@ -274,22 +248,9 @@ body {
 
 
 .px-canvas {
-  background: #333;
   width: 100%;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   margin: 0;
   image-rendering: pixelated;
-}
-.toolbar {
-  background: purple;
-  position: absolute;
-  bottom: 1em;
-  right: 1em;
-}
-.toolbar button {
-  padding: 1rem;
-  border: none;
-  background: red;
-  color: white;
 }
 </style>

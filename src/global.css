@@ -1,0 +1,35 @@
+:root {
+  --fg: #0f0;
+  --bg: #f0f;
+  --hl: #ff0f00;
+}
+
+html, body, #app {
+  height: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+
+    background: purple;
+
+    margin: 0 auto;
+
+    /* overflow: hidden; */
+    flex-direction: column;
+    justify-content: flex-start;
+
+
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+    supported by Chrome, Edge, Opera and Firefox */
+
+}
