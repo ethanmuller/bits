@@ -25,20 +25,34 @@ themeSynth.set({
 
 const store = usePxStore()
 
-function fill() {
+function random() {
   const f = new Array(9)
 
   for (let y = 0; y < 9; y++) {
     f[y] = []
 
     for (let x = 0; x < 9; x++) {
-      f[y][x] = 1
+      f[y][x] = Math.random() > 0.5 ? 1 : 0
     }
   }
 
 
   store.chunkSet(store.pan[0]*9, store.pan[1]*9, f)
   store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, f)
+}
+
+function copy() {
+  for (let y = 0; y < store.clipboard.length; y++) {
+    for (let x = 0; x < store.clipboard.length; x++) {
+      store.clipboard[y][x] = store.px[y + store.pan[1]*9][x + store.pan[0]*9]
+    }
+  }
+  console.log(store.clipboard)
+}
+
+function paste() {
+  store.chunkSet(store.pan[0]*9, store.pan[1]*9, store.clipboard)
+  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, store.clipboard)
 }
 
 function triggerThemeChange(ev, themeName) {
@@ -72,7 +86,9 @@ store.socket.on('theme changed', (themeName) => {
 <template>
   <Spravigator />
   <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
-  <button @click="fill">fill</button>
+  <button @click="copy">copy</button>
+  <button @click="paste">paste</button>
+  <button @click="random">random</button>
   <div class="tb" :style="{ background: store.themes[store.currentTheme].bg }">
 
     <div class="ps" :style="{ color: store.themes[store.currentTheme].fg }">

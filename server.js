@@ -26,9 +26,9 @@ resetPx()
 
 
 function chunkSet(panX, panY, chunkPx) {
-  for (let y = panY; y < chunkPx.length + panY; y++) {
-    for (let x = panX; x < chunkPx.length + panX; x++) {
-      pset(x, y, 1)
+  for (let y = 0; y < chunkPx.length; y++) {
+    for (let x = 0; x < chunkPx.length; x++) {
+      pset(x + panX, y + panY, chunkPx[y][x])
     }
   }
 }

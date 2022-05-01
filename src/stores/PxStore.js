@@ -19,6 +19,7 @@ export const usePxStore = defineStore('main', {
   state() {
     return {
       px: createEmptyGrid(81, 81),
+      clipboard: createEmptyGrid(9, 9),
       socket: io(),
       pan: [0, 0],
       currentTheme: 'electric',
@@ -70,9 +71,9 @@ export const usePxStore = defineStore('main', {
       this.px[y][x] = c
     },
     chunkSet(panX, panY, chunkPx) {
-      for (let y = panY; y < chunkPx.length + panY; y++) {
-        for (let x = panX; x < chunkPx.length + panX; x++) {
-          this.pset(x, y, 1)
+      for (let y = 0; y < chunkPx.length; y++) {
+        for (let x = 0; x < chunkPx.length; x++) {
+          this.pset(x + panX, y + panY, chunkPx[y][x])
         }
       }
     },
