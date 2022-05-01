@@ -51,10 +51,14 @@ store.socket.on('updatePx', (x,y,c) => {
   updateCanvas()
 })
 
+store.socket.on('updateChunk', (panX, panY, chunkPx) => {
+  store.chunkSet(panX, panY, chunkPx)
+  updateCanvas()
+})
+
 store.socket.emit('join', (data) => {
   store.px = data.px
   store.currentTheme = data.currentTheme
-  console.log(data)
   updateCanvas()
 })
 

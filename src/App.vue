@@ -25,8 +25,23 @@ themeSynth.set({
 
 const store = usePxStore()
 
+function fill() {
+  const f = new Array(9)
+
+  for (let y = 0; y < 9; y++) {
+    f[y] = []
+
+    for (let x = 0; x < 9; x++) {
+      f[y][x] = 1
+    }
+  }
+
+
+  store.chunkSet(store.pan[0]*9, store.pan[1]*9, f)
+  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, f)
+}
+
 function triggerThemeChange(ev, themeName) {
-  //console.log([...el.parentElement.children].indexOf(el))
   store.changeTheme(themeName)
   store.socket.emit('change theme', themeName)
 
@@ -45,7 +60,6 @@ function clear() {
 
 store.socket.on('theme changed', (themeName) => {
   store.changeTheme(themeName)
-  console.log(themeName)
 
   try {
     themeSynth.triggerAttackRelease(750, "64n");
@@ -58,6 +72,7 @@ store.socket.on('theme changed', (themeName) => {
 <template>
   <Spravigator />
   <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
+  <button @click="fill">fill</button>
   <div class="tb" :style="{ background: store.themes[store.currentTheme].bg }">
 
     <div class="ps" :style="{ color: store.themes[store.currentTheme].fg }">

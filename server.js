@@ -25,6 +25,14 @@ function resetPx() {
 resetPx()
 
 
+function chunkSet(panX, panY, chunkPx) {
+  for (let y = panY; y < chunkPx.length + panY; y++) {
+    for (let x = panX; x < chunkPx.length + panX; x++) {
+      pset(x, y, 1)
+    }
+  }
+}
+
 function pset(x, y, c) {
   px[y][x] = c
 }
@@ -100,6 +108,11 @@ async function createServer() {
       pset(x,y,c)
       socket.broadcast.emit("updatePx", x,y,c);
     });
+    socket.on("chunkSet", function (panX, panY, chunkPx) {
+      console.log('setting chunk')
+      chunkSet(panX, panY, chunkPx)
+      socket.broadcast.emit("updateChunk", panX, panY, chunkPx);
+    })
   });
 }
 

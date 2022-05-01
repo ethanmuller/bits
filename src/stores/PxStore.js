@@ -69,6 +69,13 @@ export const usePxStore = defineStore('main', {
     pset(x,y,c) {
       this.px[y][x] = c
     },
+    chunkSet(panX, panY, chunkPx) {
+      for (let y = panY; y < chunkPx.length + panY; y++) {
+        for (let x = panX; x < chunkPx.length + panX; x++) {
+          this.pset(x, y, 1)
+        }
+      }
+    },
     setPan(x, y) {
       this.pan[0] = x
       this.pan[1] = y
