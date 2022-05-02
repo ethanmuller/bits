@@ -214,8 +214,6 @@ function updateCanvas() {
     state.ctx.clearRect(0, 0, props.width, props.width)
     state.ctx.fillStyle = pxColor
 
-    const panX = store.pan[0]*props.width
-
     for (let y = 0; y < props.width; y++) {
       for (let x = 0; x < props.width; x++) {
         const v = store.pget(x,y)

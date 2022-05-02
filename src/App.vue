@@ -1,8 +1,17 @@
 <script setup>
+import { reactive, ref, onMounted } from 'vue'
 import Spreditor from './components/Spreditor.vue'
 import Spravigator from './components/Spravigator.vue'
 import { usePxStore } from './stores/PxStore.js'
 import * as Tone from 'tone'
+
+const store = usePxStore()
+
+store.$subscribe((mutation, s) => {
+  updateCanvas()
+})
+
+const clipboardCanvas = ref(null)
 
 const themeSynth = new Tone.PolySynth().toDestination();
 themeSynth.set({
@@ -23,16 +32,42 @@ themeSynth.set({
   },
 });
 
-const store = usePxStore()
+const state = reactive({
+  ctx: null,
+})
 
-function random() {
+onMounted(() => {
+  state.ctx = clipboardCanvas.value.getContext('2d')
+
+  updateCanvas()
+})
+
+function updateCanvas() {
+  if (state && state.ctx) {
+    const pxColor = store.themes[store.currentTheme].fg
+
+    state.ctx.fillStyle = pxColor
+    state.ctx.clearRect(0, 0, 9, 9)
+
+    for (let y = 0; y < 9; y++) {
+      for (let x = 0; x < 9; x++) {
+        const v = store.clipboard[y][x]
+        if (v === 1) {
+          state.ctx.fillRect(x,y,1,1)
+        }
+      }
+    }
+  }
+}
+
+function clear() {
   const f = new Array(9)
 
   for (let y = 0; y < 9; y++) {
     f[y] = []
 
     for (let x = 0; x < 9; x++) {
-      f[y][x] = Math.random() > 0.5 ? 1 : 0
+      f[y][x] = 0
     }
   }
 
@@ -47,12 +82,31 @@ function copy() {
       store.clipboard[y][x] = store.px[y + store.pan[1]*9][x + store.pan[0]*9]
     }
   }
-  console.log(store.clipboard)
+}
+
+function cut() {
+  for (let y = 0; y < store.clipboard.length; y++) {
+    for (let x = 0; x < store.clipboard.length; x++) {
+      store.clipboard[y][x] = store.px[y + store.pan[1]*9][x + store.pan[0]*9]
+    }
+  }
+
+  clear()
+
+  try {
+    themeSynth.triggerAttackRelease(450, "64n");
+  } catch(e) {
+  }
 }
 
 function paste() {
   store.chunkSet(store.pan[0]*9, store.pan[1]*9, store.clipboard)
   store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, store.clipboard)
+
+  try {
+    themeSynth.triggerAttackRelease(850, "64n");
+  } catch(e) {
+  }
 }
 
 function triggerThemeChange(ev, themeName) {
@@ -65,7 +119,7 @@ function triggerThemeChange(ev, themeName) {
   }
 }
 
-function clear() {
+function clearAll() {
   const shouldClear = confirm('Clear the whole board?')
   if (shouldClear) {
     store.socket.emit('clear')
@@ -86,22 +140,27 @@ store.socket.on('theme changed', (themeName) => {
 <template>
   <Spravigator />
   <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
-  <button @click="copy">copy</button>
-  <button @click="paste">paste</button>
-  <button @click="random">random</button>
-  <div class="tb" :style="{ background: store.themes[store.currentTheme].bg }">
+  <div class="split">
+    <div class="tb" :style="{ background: store.themes[store.currentTheme].bg }">
+    <div class="clipboard">
+      <button class="clipboard-btn" @click="cut">✂️</button>
+      <button class="clipboard-btn" @click="paste">
 
-    <div class="ps" :style="{ color: store.themes[store.currentTheme].fg }">
-      <div v-for="theme, themeName in store.themes">
-        <button @click="(e) => triggerThemeChange(e, themeName)" :style="{ background: theme.bg }" :class="{ selected: themeName === store.currentTheme }">
-          <span :style="{ background: theme.fg }"></span>
-          <span :style="{ background: theme.hl }"></span>
-        </button>
-      </div>
+        <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
+      </button>
+
+      <button class="clear-btn" @click="clearAll">🗳️</button>
     </div>
 
-    <button class="clear-btn" @click="clear">🗳️</button>
-
+      <div class="ps" :style="{ color: store.themes[store.currentTheme].fg }">
+        <div v-for="theme, themeName in store.themes">
+          <button @click="(e) => triggerThemeChange(e, themeName)" :style="{ background: theme.bg }" :class="{ selected: themeName === store.currentTheme }">
+            <span :style="{ background: theme.fg }"></span>
+            <span :style="{ background: theme.hl }"></span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -112,8 +171,6 @@ store.socket.on('theme changed', (themeName) => {
   flex-direction: column;
 }
 .ps {
-  align-self: center;
-
   display: flex;
 
   flex-wrap: wrap;
@@ -169,6 +226,33 @@ store.socket.on('theme changed', (themeName) => {
   background: red;
   color: white;
 
-  align-self: end;
+  margin-right: auto;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }
+
+.clipboard-btn {
+  padding: 1rem;
+  border: none;
+  background: green;
+  color: white;
+
+  align-self: end;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.split {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.clipboard {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.clipboard canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
 </style>

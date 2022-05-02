@@ -14,9 +14,6 @@ html, body, #app {
 }
 
 body {
-
-    background: purple;
-
     margin: 0 auto;
 
     /* overflow: hidden; */
