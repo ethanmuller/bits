@@ -109,7 +109,6 @@ async function createServer() {
       socket.broadcast.emit("updatePx", x,y,c);
     });
     socket.on("chunkSet", function (panX, panY, chunkPx) {
-      console.log('setting chunk')
       chunkSet(panX, panY, chunkPx)
       socket.broadcast.emit("updateChunk", panX, panY, chunkPx);
     })

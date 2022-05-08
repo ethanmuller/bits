@@ -27,7 +27,7 @@ export const usePxStore = defineStore('main', {
         electric: {
           fg: '#000',
           bg: '#fff',
-          hl: '#fff000',
+          hl: '#ffcc00',
         },
         cute: {
           fg: '#ff8888',
@@ -35,9 +35,9 @@ export const usePxStore = defineStore('main', {
           hl: '#ffffff',
         },
         cloudy: {
-          fg: '#fff',
-          bg: '#aaa',
-          hl: '#777',
+          fg: '#888',
+          bg: '#fff',
+          hl: '#ddd',
         },
         energy: {
           fg: '#fff000',

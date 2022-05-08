@@ -84,7 +84,34 @@ function copy() {
   }
 }
 
+function isChunkEmpty(chunk) {
+  const height = chunk.length
+  const width = chunk[0].length
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (chunk[y][x] !== 0) {
+        return false
+      }
+    }
+  }
+
+  return true
+}
+
 function cut() {
+  const chunk = store.px.slice(store.pan[1]*9, store.pan[1]*9+9)
+
+  for (let y = 0; y < 9; y++) {
+    chunk[y] = chunk[y].slice(store.pan[0]*9, store.pan[0]*9+9)
+  }
+
+  if (isChunkEmpty(chunk)) {
+    // prevent cutting if chunk is already empty
+    // so we don't overwrite clipboard with blankness
+    return
+  }
+
   for (let y = 0; y < store.clipboard.length; y++) {
     for (let x = 0; x < store.clipboard.length; x++) {
       store.clipboard[y][x] = store.px[y + store.pan[1]*9][x + store.pan[0]*9]
@@ -92,6 +119,26 @@ function cut() {
   }
 
   clear()
+
+  try {
+    themeSynth.triggerAttackRelease(450, "64n");
+  } catch(e) {
+  }
+}
+
+function randomize() {
+  const f = new Array(9)
+
+  for (let y = 0; y < 9; y++) {
+    f[y] = []
+
+    for (let x = 0; x < 9; x++) {
+      f[y][x] = Math.random() >= 0.9 ? 1 : 0;
+    }
+  }
+
+  store.chunkSet(store.pan[0]*9, store.pan[1]*9, f)
+  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, f)
 
   try {
     themeSynth.triggerAttackRelease(450, "64n");
@@ -142,14 +189,15 @@ store.socket.on('theme changed', (themeName) => {
   <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
   <div class="split">
     <div class="tb" :style="{ background: store.themes[store.currentTheme].bg }">
-    <div class="clipboard">
-      <button class="clipboard-btn" @click="cut">✂️</button>
+    <div class="toolbar">
+      <button class="clipboard-btn" @click="cut">cut✂️</button>
       <button class="clipboard-btn" @click="paste">
-
+        paste
         <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
       </button>
 
-      <button class="clear-btn" @click="clearAll">🗳️</button>
+      <button class="clear-btn" @click="clearAll">clear all</button>
+      <button class="rando-btn" @click="randomize">randomize</button>
     </div>
 
       <div class="ps" :style="{ color: store.themes[store.currentTheme].fg }">
@@ -221,23 +269,9 @@ store.socket.on('theme changed', (themeName) => {
   transform: translate3d(-50%, 50%, 0) scale(2);
 }
 .clear-btn {
-  padding: 1rem;
-  border: none;
-  background: red;
-  color: white;
-
-  margin-right: auto;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }
 
 .clipboard-btn {
-  padding: 1rem;
-  border: none;
-  background: green;
-  color: white;
-
-  align-self: end;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }
 
 .split {
@@ -245,14 +279,25 @@ store.socket.on('theme changed', (themeName) => {
   flex-direction: row-reverse;
 }
 
-.clipboard {
+.toolbar {
   display: flex;
   flex-direction: row-reverse;
 }
 
-.clipboard canvas {
+.toolbar button {
+  padding: 1rem;
+  border: none;
+  background: red;
+  color: white;
+
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.toolbar canvas {
   display: block;
   image-rendering: pixelated;
+  width: 27px;
+  height: 27px;
 }
 
 </style>
