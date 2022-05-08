@@ -99,19 +99,33 @@ function isChunkEmpty(chunk) {
   return true
 }
 
-function cut() {
+function invert() {
+  const chunk = getEditedChunk()
+
+  const height = chunk.length
+  const width = chunk[0].length
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      chunk[y][x] = chunk[y][x] === 1 ? 0 : 1
+    }
+  }
+
+  store.chunkSet(store.pan[0]*9, store.pan[1]*9, chunk)
+  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, chunk)
+}
+
+function getEditedChunk() {
   const chunk = store.px.slice(store.pan[1]*9, store.pan[1]*9+9)
 
   for (let y = 0; y < 9; y++) {
     chunk[y] = chunk[y].slice(store.pan[0]*9, store.pan[0]*9+9)
   }
 
-  if (isChunkEmpty(chunk)) {
-    // prevent cutting if chunk is already empty
-    // so we don't overwrite clipboard with blankness
-    return
-  }
+  return chunk
+}
 
+function cut() {
   for (let y = 0; y < store.clipboard.length; y++) {
     for (let x = 0; x < store.clipboard.length; x++) {
       store.clipboard[y][x] = store.px[y + store.pan[1]*9][x + store.pan[0]*9]
@@ -127,23 +141,22 @@ function cut() {
 }
 
 function randomize() {
-  const f = new Array(9)
+  const chunk = getEditedChunk()
 
-  for (let y = 0; y < 9; y++) {
-    f[y] = []
+  const height = chunk.length
+  const width = chunk[0].length
 
-    for (let x = 0; x < 9; x++) {
-      f[y][x] = Math.random() >= 0.9 ? 1 : 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const r = Math.random() >= 0.95;
+      if (r) {
+        chunk[y][x] = chunk[y][x] === 1 ? 0 : 1
+      }
     }
   }
 
-  store.chunkSet(store.pan[0]*9, store.pan[1]*9, f)
-  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, f)
-
-  try {
-    themeSynth.triggerAttackRelease(450, "64n");
-  } catch(e) {
-  }
+  store.chunkSet(store.pan[0]*9, store.pan[1]*9, chunk)
+  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, chunk)
 }
 
 function paste() {
@@ -190,7 +203,7 @@ store.socket.on('theme changed', (themeName) => {
   <div class="split">
     <div class="tb" :style="{ background: store.themes[store.currentTheme].bg }">
     <div class="toolbar">
-      <button class="clipboard-btn" @click="cut">cut✂️</button>
+      <button class="clipboard-btn" @click="cut" :disabled="isChunkEmpty(getEditedChunk())">cut✂️</button>
       <button class="clipboard-btn" @click="paste">
         paste
         <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
@@ -198,6 +211,7 @@ store.socket.on('theme changed', (themeName) => {
 
       <button class="clear-btn" @click="clearAll">clear all</button>
       <button class="rando-btn" @click="randomize">randomize</button>
+      <button class="invert-btn" @click="invert">invert</button>
     </div>
 
       <div class="ps" :style="{ color: store.themes[store.currentTheme].fg }">
@@ -291,6 +305,10 @@ store.socket.on('theme changed', (themeName) => {
   color: white;
 
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.toolbar button:disabled {
+  opacity: 0.4;
 }
 
 .toolbar canvas {
