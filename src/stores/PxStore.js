@@ -18,7 +18,7 @@ function createEmptyGrid(width, height) {
 export const usePxStore = defineStore('main', {
   state() {
     return {
-      px: createEmptyGrid(81, 81),
+      px: createEmptyGrid(81, 27),
       clipboard: createEmptyGrid(9, 9),
       socket: io(),
       pan: [0, 0],
@@ -78,8 +78,16 @@ export const usePxStore = defineStore('main', {
       }
     },
     setPan(x, y) {
-      this.pan[0] = x
-      this.pan[1] = y
+      if (x < 0) {
+        x = 8
+      }
+
+      if (y < 0) {
+        y = 2
+      }
+
+      this.pan[0] = x % 9
+      this.pan[1] = y % 3
     },
     changeTheme(t) {
       this.currentTheme = t

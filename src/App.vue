@@ -140,6 +140,10 @@ function cut() {
   }
 }
 
+function ass(x,y) {
+  store.setPan(store.pan[0] + x, store.pan[1] + y)
+}
+
 function randomize() {
   const chunk = getEditedChunk()
 
@@ -199,49 +203,59 @@ store.socket.on('theme changed', (themeName) => {
 
 <template>
   <Spravigator />
-  <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
-  <div class="split">
-    <div class="tb" :style="{ background: store.themes[store.currentTheme].bg }">
+  <div class="wrapper">
+    <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
     <div class="toolbar">
-      <button class="clipboard-btn" @click="cut" :disabled="isChunkEmpty(getEditedChunk())">cut✂️</button>
-      <button class="clipboard-btn" @click="paste">
-        paste
+
+      <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
+      <button class="toolbar-btn rando-btn" @click="randomize">🎲</button>
+      <button class="toolbar-btn invert-btn" @click="invert">🌓</button>
+      <button class="toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getEditedChunk())">✂️</button>
+      <button class="toolbar-btn clipboard-btn" @click="paste">
         <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
       </button>
-
-      <button class="clear-btn" @click="clearAll">clear all</button>
-      <button class="rando-btn" @click="randomize">randomize</button>
-      <button class="invert-btn" @click="invert">invert</button>
     </div>
+    <div class="arrows">
+      <button class="arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)">←</button>
+      <button class="arrow-btn arrow-btn--vertical" @click="ass(0, 1)">↓</button>
+      <button class="arrow-btn arrow-btn--vertical" @click="ass(0, -1)">↑</button>
+      <button class="arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
+    </div>
+  </div>
+  <div class="split">
 
-      <div class="ps" :style="{ color: store.themes[store.currentTheme].fg }">
-        <div v-for="theme, themeName in store.themes">
-          <button @click="(e) => triggerThemeChange(e, themeName)" :style="{ background: theme.bg }" :class="{ selected: themeName === store.currentTheme }">
-            <span :style="{ background: theme.fg }"></span>
-            <span :style="{ background: theme.hl }"></span>
-          </button>
-        </div>
+    <div class="palettes" :style="{ color: store.themes[store.currentTheme].fg }">
+      <div v-for="theme, themeName in store.themes">
+        <button @click="(e) => triggerThemeChange(e, themeName)" :style="{ background: theme.bg }" :class="{ selected: themeName === store.currentTheme }">
+          <span :style="{ background: theme.fg }"></span>
+          <span :style="{ background: theme.hl }"></span>
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <style>
-.tb {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+
+.wrapper {
+  /* subtracting from 100vh to account for
+  mobile browser chrome */
+  /*
+  min-height: calc(100vh - 80px);
+  */
 }
-.ps {
+
+.palettes {
   display: flex;
+  display: none;
 
   flex-wrap: wrap;
-  width: 15em;
+  width: 100%;
   justify-content: center;
 
   margin-top: 0.5em;
 }
-.ps button {
+.palettes button {
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   display: flex;
   background: transparent;
@@ -256,10 +270,10 @@ store.socket.on('theme changed', (themeName) => {
   margin: 0.5em;
 }
 
-.ps button.selected {
+.palettes button.selected {
 }
 
-.ps span {
+.palettes span {
   display: inline-block;
   width: 1.5rem;
   height: 1.5rem;
@@ -267,19 +281,19 @@ store.socket.on('theme changed', (themeName) => {
   transform-origin: 50% 50%;
 }
 
-.ps span:nth-child(1) {
+.palettes span:nth-child(1) {
   z-index: 1;
 }
 
-.ps span:nth-child(2) {
+.palettes span:nth-child(2) {
   transform: translate3d(0, 100%, 0);
 }
 
-.ps .selected span:nth-child(1) {
+.palettes .selected span:nth-child(1) {
   transform: translate3d(50%, 50%, 0);
 }
 
-.ps .selected span:nth-child(2) {
+.palettes .selected span:nth-child(2) {
   transform: translate3d(-50%, 50%, 0) scale(2);
 }
 .clear-btn {
@@ -295,16 +309,62 @@ store.socket.on('theme changed', (themeName) => {
 
 .toolbar {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
+  justify-content: stretch;
+  min-height: 5em;
 }
 
-.toolbar button {
-  padding: 1rem;
-  border: none;
-  background: red;
-  color: white;
+.arrows {
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  min-height: 5em;
+}
 
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+.toolbar-btn {
+  flex: 1;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: white;
+  color: black;
+  overflow: hidden;
+  font-size: 1em;
+
+  touch-action: manipulation;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-btn {
+  flex: 1;
+  padding: 0;
+  margin: 0.125em;
+  border: none;
+  background: #fafafa;
+  color: #666;
+  overflow: hidden;
+
+  touch-action: manipulation;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.5em;
+  font-weight: bold;
+
+  line-height: 0;
+}
+
+.arrow-btn--horizontal {
+  padding-bottom: 0.2em;
+}
+
+.cut-btn {
+  margin-left: auto;
 }
 
 .toolbar button:disabled {
@@ -314,8 +374,8 @@ store.socket.on('theme changed', (themeName) => {
 .toolbar canvas {
   display: block;
   image-rendering: pixelated;
-  width: 27px;
-  height: 27px;
+  width: 36px;
+  height: 36px;
 }
 
 </style>

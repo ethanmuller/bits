@@ -30,7 +30,6 @@ const state = reactive({
   ctx: null,
   c: 1,
   isAudioSetup: false,
-  num: 0,
 })
 
 store.socket.on('updateAll', (px) => {
@@ -191,7 +190,6 @@ function draw(x,y) {
   const px = x + store.pan[0]*props.width
   const py = y + store.pan[1]*props.height
     playSound(x,y, state.c)
-  state.num += 1
     store.pset(px, py, state.c)
     store.socket.emit('pset', px, py, state.c)
     updateCanvas()
@@ -232,32 +230,20 @@ function updateCanvas() {
 </script>
 
 <template>
-  <div class="wrapper">
-    <canvas ref="pad" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart="touchStart" v-on:touchmove.prevent.disablePassive="touchMove" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
-    {{state.num}}
-  </div>
+  <canvas ref="pad" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart="touchStart" v-on:touchmove.prevent="touchMove" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
 </template>
 
 <style>
-
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  /* subtracting from 100vh to account for
-  mobile browser chrome */
-  /*
-  min-height: calc(100vh - 80px);
-  */
-}
-
-
 .px-canvas {
+  display: block;
   width: 100%;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   margin: 0;
+  position: relative;
+  z-index: 1;
+
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   image-rendering: pixelated;
+
+  touch-action: manipulation;
 }
 </style>
