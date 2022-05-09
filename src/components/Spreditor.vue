@@ -14,6 +14,7 @@ const pad = ref(null)
 const props = defineProps(['width', 'height', 'theme'])
 
 
+
 let lastX, lastY
 
 let synth, synth2, synth3
@@ -29,6 +30,7 @@ const state = reactive({
   ctx: null,
   c: 1,
   isAudioSetup: false,
+  num: 0,
 })
 
 store.socket.on('updateAll', (px) => {
@@ -141,6 +143,7 @@ function touchMove(e) {
 
   // if changed from last position, draw
   if (x !== lastX || y !== lastY) {
+
     if (store.pget(x,y) === state.c) {
       return
     }
@@ -188,6 +191,7 @@ function draw(x,y) {
   const px = x + store.pan[0]*props.width
   const py = y + store.pan[1]*props.height
     playSound(x,y, state.c)
+  state.num += 1
     store.pset(px, py, state.c)
     store.socket.emit('pset', px, py, state.c)
     updateCanvas()
@@ -229,7 +233,8 @@ function updateCanvas() {
 
 <template>
   <div class="wrapper">
-    <canvas ref="pad" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
+    <canvas ref="pad" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart="touchStart" v-on:touchmove.prevent.disablePassive="touchMove" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
+    {{state.num}}
   </div>
 </template>
 
