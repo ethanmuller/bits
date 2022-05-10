@@ -22,6 +22,7 @@ export const usePxStore = defineStore('main', {
       clipboard: createEmptyGrid(9, 9),
       socket: io(),
       pan: [0, 0],
+      i: 0,
       currentTheme: 'electric',
       themes: {
         electric: {

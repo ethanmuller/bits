@@ -3,6 +3,7 @@ import { reactive, ref, onMounted } from 'vue'
 import Spreditor from './components/Spreditor.vue'
 import Spravigator from './components/Spravigator.vue'
 import { usePxStore } from './stores/PxStore.js'
+import { sfx } from './Sfx.js'
 import * as Tone from 'tone'
 
 const store = usePxStore()
@@ -113,6 +114,9 @@ function invert() {
 
   store.chunkSet(store.pan[0]*9, store.pan[1]*9, chunk)
   store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, chunk)
+
+  store.i = (store.i + 1) % 2
+  sfx.bwip()
 }
 
 function getEditedChunk() {
@@ -133,11 +137,7 @@ function cut() {
   }
 
   clear()
-
-  try {
-    themeSynth.triggerAttackRelease(450, "64n");
-  } catch(e) {
-  }
+  sfx.down()
 }
 
 function ass(x,y) {
@@ -161,16 +161,15 @@ function randomize() {
 
   store.chunkSet(store.pan[0]*9, store.pan[1]*9, chunk)
   store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, chunk)
+
+  sfx.csh()
 }
 
 function paste() {
   store.chunkSet(store.pan[0]*9, store.pan[1]*9, store.clipboard)
   store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, store.clipboard)
 
-  try {
-    themeSynth.triggerAttackRelease(850, "64n");
-  } catch(e) {
-  }
+  sfx.up()
 }
 
 function triggerThemeChange(ev, themeName) {
@@ -209,7 +208,7 @@ store.socket.on('theme changed', (themeName) => {
 
       <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
       <button class="toolbar-btn rando-btn" @click="randomize">🎲</button>
-      <button class="toolbar-btn invert-btn" @click="invert">🌓</button>
+      <button class="toolbar-btn invert-btn" @click="invert"><span :style="{ transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></button>
       <button class="toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getEditedChunk())">✂️</button>
       <button class="toolbar-btn clipboard-btn" @click="paste">
         <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>

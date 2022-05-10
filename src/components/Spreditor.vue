@@ -2,6 +2,7 @@
 import { reactive, ref, onMounted } from 'vue'
 import * as Tone from 'tone'
 import { usePxStore } from '../stores/PxStore.js'
+import { sfx } from '../Sfx.js'
 
 const store = usePxStore()
 
@@ -37,7 +38,7 @@ store.socket.on('updateAll', (px) => {
   updateCanvas()
 
   try {
-    synth2.triggerAttackRelease(500, "64n");
+    //synth2.triggerAttackRelease(500, "64n");
   } catch(e) {
   }
 })
@@ -45,7 +46,7 @@ store.socket.on('updatePx', (x,y,c) => {
   //playSound(x,y)
 
   try {
-    synth3.triggerAttackRelease(500, "64n");
+    //synth3.triggerAttackRelease(500, "64n");
   } catch(e) {
   }
   store.pset(x,y,c)
@@ -64,24 +65,6 @@ store.socket.emit('join', (data) => {
 })
 
 function setupAudio(e) {
-  synth = new Tone.PolySynth().toDestination();
-  synth.set({
-    oscillator: {
-      type: 'sine',
-    },
-    envelope: {
-      attack: 0,
-      decay: 0.01,
-      sustain: 0,
-      release: 0,
-    },
-    filter : {
-      Q: 2,
-      type : 'lowpass' ,
-      rolloff : -48,
-      frequency: 200,
-    },
-  });
 
   synth2 = new Tone.PolySynth().toDestination();
   synth2.set({
@@ -189,7 +172,8 @@ function touchStart(e) {
 function draw(x,y) {
   const px = x + store.pan[0]*props.width
   const py = y + store.pan[1]*props.height
-    playSound(x,y, state.c)
+    sfx.bit(x, y, state.c)
+    //playSound(x,y, state.c)
     store.pset(px, py, state.c)
     store.socket.emit('pset', px, py, state.c)
     updateCanvas()
@@ -200,7 +184,6 @@ function playSound(x,y) {
     setupAudio()
   }
 
-  synth.triggerAttackRelease(y/props.height*600 + x/props.width * 600 + 900 * state.c, "64n");
 }
 
 onMounted(() => {
