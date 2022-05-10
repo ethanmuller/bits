@@ -16,6 +16,18 @@ const bitSynth = new Tone.Synth({
   },
 }).toDestination();
 
+const navSynth = new Tone.Synth({
+  oscillator: {
+    type: 'sine',
+  },
+  envelope: {
+    attack: 0.001,
+    decay: 0.02,
+    sustain: 0,
+    release: 0,
+  },
+}).toDestination();
+
 const clipboardSynth = new Tone.Synth({
   oscillator: {
     type: 'sine',
@@ -60,7 +72,9 @@ export const sfx = {
     } catch(e) {
     }
   },
-  rando() {
+  nav() {
+    navSynth.triggerAttackRelease(300, "32n");
+    navSynth.frequency.rampTo(100, 0.02)
   },
   bwip() {
     clipboardSynth.triggerAttackRelease("C3", "32n");

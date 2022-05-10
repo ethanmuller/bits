@@ -1,3 +1,4 @@
+import { sfx } from '../Sfx.js'
 import { defineStore } from "pinia";
 import { io } from 'socket.io-client'
 
@@ -21,7 +22,7 @@ export const usePxStore = defineStore('main', {
       px: createEmptyGrid(81, 27),
       clipboard: createEmptyGrid(9, 9),
       socket: io(),
-      pan: [0, 0],
+      pan: [4, 1],
       i: 0,
       currentTheme: 'electric',
       themes: {
@@ -89,6 +90,8 @@ export const usePxStore = defineStore('main', {
 
       this.pan[0] = x % 9
       this.pan[1] = y % 3
+
+      sfx.nav()
     },
     changeTheme(t) {
       this.currentTheme = t
