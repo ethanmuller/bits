@@ -1,6 +1,6 @@
 import * as Tone from 'tone'
 
-//Tone.getDestination().volume.value = -6
+Tone.getDestination().volume.value = -6
 
 let isSetup = false
 
