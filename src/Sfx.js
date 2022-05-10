@@ -1,6 +1,8 @@
 import * as Tone from 'tone'
 
-Tone.getDestination().volume.value = -6
+//Tone.getDestination().volume.value = -6
+
+let isSetup = false
 
 const bitSynth = new Tone.Synth({
   oscillator: {
@@ -46,6 +48,11 @@ const noiseSynth = new Tone.NoiseSynth({
 
 export const sfx = {
   bit(x,y,c) {
+    if (!isSetup) {
+      isSetup = true
+      return
+    }
+
     const f = 300-y/9*300 + x/9 * 300 + 300 + c * 300
 
     try {
