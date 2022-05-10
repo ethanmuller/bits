@@ -7,7 +7,7 @@ const { createServer: createViteServer } = require('vite')
 const w = 89
 const h = 89
 let px
-const PORT = 3030
+const PORT = 3333
 
 let currentTheme = 'electric'
 
