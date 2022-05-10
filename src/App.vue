@@ -140,7 +140,7 @@ function cut() {
   sfx.down()
 }
 
-function ass(x,y) {
+function relativePan(x,y) {
   store.setPan(store.pan[0] + x, store.pan[1] + y)
 }
 
@@ -215,10 +215,10 @@ store.socket.on('theme changed', (themeName) => {
       </button>
     </div>
     <div class="arrows">
-      <button class="arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)">←</button>
-      <button class="arrow-btn arrow-btn--vertical" @click="ass(0, 1)">↓</button>
-      <button class="arrow-btn arrow-btn--vertical" @click="ass(0, -1)">↑</button>
-      <button class="arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
+      <button class="arrow-btn arrow-btn--horizontal" @click="relativePan(-1, 0)">←</button>
+      <button class="arrow-btn arrow-btn--vertical" @click="relativePan(0, 1)">↓</button>
+      <button class="arrow-btn arrow-btn--vertical" @click="relativePan(0, -1)">↑</button>
+      <button class="arrow-btn arrow-btn--horizontal" @click="relativePan(1, 0)">→</button>
     </div>
   </div>
 
