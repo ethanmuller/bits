@@ -201,8 +201,8 @@ store.socket.on('theme changed', (themeName) => {
 </script>
 
 <template>
-  <Spravigator />
   <div class="wrapper">
+    <Spravigator />
     <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
     <div class="toolbar">
 
@@ -221,27 +221,23 @@ store.socket.on('theme changed', (themeName) => {
       <button class="arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
     </div>
   </div>
-  <div class="split">
 
-    <div class="palettes" :style="{ color: store.themes[store.currentTheme].fg }">
-      <div v-for="theme, themeName in store.themes">
-        <button @click="(e) => triggerThemeChange(e, themeName)" :style="{ background: theme.bg }" :class="{ selected: themeName === store.currentTheme }">
-          <span :style="{ background: theme.fg }"></span>
-          <span :style="{ background: theme.hl }"></span>
-        </button>
-      </div>
+  <div class="palettes" :style="{ color: store.themes[store.currentTheme].fg }">
+    <div v-for="theme, themeName in store.themes">
+      <button @click="(e) => triggerThemeChange(e, themeName)" :style="{ background: theme.bg }" :class="{ selected: themeName === store.currentTheme }">
+        <span :style="{ background: theme.fg }"></span>
+        <span :style="{ background: theme.hl }"></span>
+      </button>
     </div>
   </div>
+
 </template>
 
 <style>
 
 .wrapper {
-  /* subtracting from 100vh to account for
-  mobile browser chrome */
-  /*
-  min-height: calc(100vh - 80px);
-  */
+  max-width: 480px;
+  margin: 0 auto;
 }
 
 .palettes {
@@ -299,11 +295,6 @@ store.socket.on('theme changed', (themeName) => {
 }
 
 .clipboard-btn {
-}
-
-.split {
-  display: flex;
-  flex-direction: row-reverse;
 }
 
 .toolbar {
