@@ -201,7 +201,6 @@ store.socket.on('theme changed', (themeName) => {
 </script>
 
 <template>
-  <Spravigator />
   <div class="wrapper">
     <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
     <div class="toolbar">
@@ -221,6 +220,7 @@ store.socket.on('theme changed', (themeName) => {
       <button class="arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
     </div>
   </div>
+  <Spravigator />
   <div class="split">
 
     <div class="palettes" :style="{ color: store.themes[store.currentTheme].fg }">
