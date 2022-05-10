@@ -1,3 +1,4 @@
+import { sfx } from '../Sfx.js'
 import { defineStore } from "pinia";
 import { io } from 'socket.io-client'
 
@@ -18,15 +19,17 @@ function createEmptyGrid(width, height) {
 export const usePxStore = defineStore('main', {
   state() {
     return {
-      px: createEmptyGrid(81, 81),
+      px: createEmptyGrid(81, 27),
+      clipboard: createEmptyGrid(9, 9),
       socket: io(),
-      pan: [0, 0],
+      pan: [4, 1],
+      i: 0,
       currentTheme: 'electric',
       themes: {
         electric: {
           fg: '#000',
           bg: '#fff',
-          hl: '#fff000',
+          hl: '#ffcc00',
         },
         cute: {
           fg: '#ff8888',
@@ -34,9 +37,9 @@ export const usePxStore = defineStore('main', {
           hl: '#ffffff',
         },
         cloudy: {
-          fg: '#fff',
-          bg: '#aaa',
-          hl: '#777',
+          fg: '#888',
+          bg: '#fff',
+          hl: '#ddd',
         },
         energy: {
           fg: '#fff000',
@@ -69,9 +72,26 @@ export const usePxStore = defineStore('main', {
     pset(x,y,c) {
       this.px[y][x] = c
     },
+    chunkSet(panX, panY, chunkPx) {
+      for (let y = 0; y < chunkPx.length; y++) {
+        for (let x = 0; x < chunkPx.length; x++) {
+          this.pset(x + panX, y + panY, chunkPx[y][x])
+        }
+      }
+    },
     setPan(x, y) {
-      this.pan[0] = x
-      this.pan[1] = y
+      if (x < 0) {
+        x = 8
+      }
+
+      if (y < 0) {
+        y = 2
+      }
+
+      this.pan[0] = x % 9
+      this.pan[1] = y % 3
+
+      sfx.nav()
     },
     changeTheme(t) {
       this.currentTheme = t

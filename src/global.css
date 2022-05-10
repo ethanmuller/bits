@@ -9,14 +9,9 @@ html, body, #app {
 }
 
 #app {
-  display: flex;
-  flex-direction: column;
 }
 
 body {
-
-    background: purple;
-
     margin: 0 auto;
 
     /* overflow: hidden; */
