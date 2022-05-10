@@ -14,6 +14,7 @@ const pad = ref(null)
 
 const props = defineProps(['width', 'height', 'theme'])
 
+let isMouseDown = false
 
 
 let lastX, lastY
@@ -108,6 +109,19 @@ function setupAudio(e) {
   state.isAudioSetup = true
 }
 
+function mouseMove(e) {
+  if (!isMouseDown) {
+    return
+  }
+
+  e.changedTouches = [{
+    clientX: e.clientX,
+    clientY: e.clientY,
+  }]
+
+  touchMove(e)
+}
+
 function touchMove(e) {
   var rect = e.target.getBoundingClientRect();
 
@@ -169,6 +183,21 @@ function touchStart(e) {
   lastY = y
 }
 
+function mouseDown(e) {
+  isMouseDown = true
+
+  e.changedTouches = [{
+    clientX: e.clientX,
+    clientY: e.clientY,
+  }]
+
+  touchStart(e)
+}
+
+function mouseUp(e) {
+  isMouseDown = false
+}
+
 function draw(x,y) {
   const px = x + store.pan[0]*props.width
   const py = y + store.pan[1]*props.height
@@ -213,7 +242,18 @@ function updateCanvas() {
 </script>
 
 <template>
-  <canvas ref="pad" class="px-canvas" :width="props.width" :height="props.height" v-on:touchstart="touchStart" v-on:touchmove.prevent="touchMove" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
+  <canvas
+    ref="pad"
+    class="px-canvas"
+    :width="props.width"
+    :height="props.height"
+    @mousedown="mouseDown"
+    @mouseup="mouseUp"
+    @mousemove="mouseMove"
+    v-on:touchstart.prevent="touchStart"
+    v-on:touchmove.prevent="touchMove"
+    :style="{ background: store.themes[store.currentTheme].hl }"
+    ></canvas>
 </template>
 
 <style>
