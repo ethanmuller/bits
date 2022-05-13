@@ -117,6 +117,7 @@ function invert() {
 
   store.i = (store.i + 1) % 2
   sfx.bwip()
+  store.socket.emit('sfx', 'bwip')
 }
 
 function getEditedChunk() {
@@ -138,6 +139,7 @@ function cut() {
 
   clear()
   sfx.down()
+  store.socket.emit('sfx', 'down')
 }
 
 function ass(x,y) {
@@ -163,6 +165,7 @@ function randomize() {
   store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, chunk)
 
   sfx.csh()
+  store.socket.emit('sfx', 'csh')
 }
 
 function paste() {
@@ -170,6 +173,7 @@ function paste() {
   store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, store.clipboard)
 
   sfx.up()
+  store.socket.emit('sfx', 'up')
 }
 
 function triggerThemeChange(ev, themeName) {
@@ -188,6 +192,10 @@ function clearAll() {
     store.socket.emit('clear')
   }
 }
+
+store.socket.on('sfx', (sfk) => {
+  sfx[sfk]()
+})
 
 store.socket.on('theme changed', (themeName) => {
   store.changeTheme(themeName)

@@ -44,7 +44,6 @@ function pget(x, y) {
 async function createServer() {
   const app = express()
 
-
   // Create Vite server in middleware mode. This disables Vite's own HTML
   // serving logic and let the parent server take control.
   //
@@ -57,14 +56,12 @@ async function createServer() {
   app.use(vite.middlewares)
 
   app.use('/', (req, res) => {
-    console.log('request')
     let template = fs.readFileSync(
       path.resolve(__dirname, 'index.html'),
       'utf-8'
     )
     res.send(template)
   })
-
 
   const server = app.listen(PORT)
   console.log(`listening on port ${PORT}`)
@@ -105,13 +102,18 @@ async function createServer() {
     });
 
     socket.on("pset", function (x,y, pan, c) {
-      pset(x+pan[0]*9,y+pan[1]*9,c)
-      socket.broadcast.emit("updatePx", x,y,c);
+      pset(x+pan[0]*9, y+pan[1]*9, c)
+      socket.broadcast.emit("updatePx", x,y,pan,c);
     });
     socket.on("chunkSet", function (panX, panY, chunkPx) {
       chunkSet(panX, panY, chunkPx)
       socket.broadcast.emit("updateChunk", panX, panY, chunkPx);
     })
+
+    socket.on("sfx", function (sfk) {
+      socket.broadcast.emit("sfx", sfk);
+    })
+
   });
 }
 
