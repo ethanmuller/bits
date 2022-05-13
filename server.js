@@ -104,8 +104,8 @@ async function createServer() {
       socket.broadcast.emit("theme changed", currentTheme);
     });
 
-    socket.on("pset", function (x,y,c) {
-      pset(x,y,c)
+    socket.on("pset", function (x,y, pan, c) {
+      pset(x+pan[0]*9,y+pan[1]*9,c)
       socket.broadcast.emit("updatePx", x,y,c);
     });
     socket.on("chunkSet", function (panX, panY, chunkPx) {

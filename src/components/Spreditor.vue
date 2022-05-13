@@ -43,14 +43,14 @@ store.socket.on('updateAll', (px) => {
   } catch(e) {
   }
 })
-store.socket.on('updatePx', (x,y,c) => {
+store.socket.on('updatePx', (x,y,pan,c) => {
   //playSound(x,y)
 
   try {
     //synth3.triggerAttackRelease(500, "64n");
   } catch(e) {
   }
-  store.pset(x,y,c)
+  store.pset(x+pan[0]*9, y+pan[1]*9, c)
   updateCanvas()
 })
 
@@ -199,12 +199,9 @@ function mouseUp(e) {
 }
 
 function draw(x,y) {
-  const px = x + store.pan[0]*props.width
-  const py = y + store.pan[1]*props.height
     sfx.bit(x, y, state.c)
-    //playSound(x,y, state.c)
-    store.pset(px, py, state.c)
-    store.socket.emit('pset', px, py, state.c)
+    store.pset(x+store.pan[0]*9, y+store.pan[1]*9, state.c)
+    store.socket.emit('pset', x, y, store.pan, state.c)
     updateCanvas()
 }
 
