@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, onUnmounted } from 'vue'
 import Spreditor from './components/Spreditor.vue'
 import Spravigator from './components/Spravigator.vue'
 import { usePxStore } from './stores/PxStore.js'
@@ -41,6 +41,14 @@ onMounted(() => {
   state.ctx = clipboardCanvas.value.getContext('2d')
 
   updateCanvas()
+
+  window.addEventListener('focus', windowReturn);
+  window.addEventListener('blur', windowLeave);
+})
+
+onUnmounted(() => {
+  window.removeEventListener('focus', windowReturn);
+  window.removeEventListener('blur', windowLeave);
 })
 
 function updateCanvas() {
@@ -206,7 +214,21 @@ store.socket.on('theme changed', (themeName) => {
   }
 })
 
+function windowLeave() {
+}
+
+function windowReturn() {
+  console.log('refreshing data')
+
+  store.socket.emit('join', (data) => {
+    store.px = data.px
+    updateCanvas()
+  })
+}
+
+
 </script>
+
 
 <template>
   <div class="wrapper">
@@ -302,14 +324,13 @@ store.socket.on('theme changed', (themeName) => {
 .clear-btn {
 }
 
-.clipboard-btn {
-}
-
 .toolbar {
   display: flex;
   flex-direction: row;
   justify-content: stretch;
+  align-items: space-between;
   min-height: 5em;
+  margin-top: 0.25rem;
 }
 
 .arrows {
@@ -317,12 +338,13 @@ store.socket.on('theme changed', (themeName) => {
   flex-direction: row;
   justify-content: stretch;
   min-height: 5em;
+  position: relative;
+  z-index: 1;
 }
 
 .toolbar-btn {
-  flex: 1;
   padding: 0;
-  margin: 0;
+  margin: 0 0.25em;
   border: none;
   background: white;
   color: black;
@@ -334,14 +356,27 @@ store.socket.on('theme changed', (themeName) => {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 4.625rem;
+  height: 4.625rem;
+
+  border-radius: 50px;
+  background: #f6f5f4;
+  box-shadow:  -20px 20px 60px #d1d0cf,
+               20px -20px 60px #ffffff;
+}
+
+.toolbar-btn:active {
+  background: #f6f5f4;
+  box-shadow: inset -20px 20px 60px #d1d0cf,
+              inset 20px -20px 60px #ffffff;
 }
 
 .arrow-btn {
   flex: 1;
   padding: 0;
-  margin: 0.125em;
+  margin: 0;
   border: none;
-  background: #fafafa;
   color: #666;
   overflow: hidden;
 
@@ -355,6 +390,34 @@ store.socket.on('theme changed', (themeName) => {
   font-weight: bold;
 
   line-height: 0;
+
+  width: 4.625rem;
+  height: 4.625rem;
+
+  border-radius: 50px;
+  background: #f6f5f4;
+  box-shadow:  -20px 20px 60px #d1d0cf,
+               20px -20px 60px #ffffff;
+}
+
+.arrow-btn:nth-child(1) {
+  border-radius: 99em 0 0 99em;
+}
+
+.arrow-btn:nth-child(2), .arrow-btn:nth-child(3) {
+  border-radius: 0;
+  box-shadow: none;
+  z-index: 1;
+}
+
+.arrow-btn:nth-child(4) {
+  border-radius: 0 99em 99em 0;
+}
+
+.arrow-btn:active {
+  background: #f6f5f4;
+  box-shadow: inset -20px 20px 60px #d1d0cf,
+              inset 20px -20px 60px #ffffff;
 }
 
 .arrow-btn--horizontal {
@@ -363,10 +426,18 @@ store.socket.on('theme changed', (themeName) => {
 
 .cut-btn {
   margin-left: auto;
+  margin-right: 0;
+  border-radius: 99rem 0 0 99rem;
+  z-index: 1;
+}
+
+.clipboard-btn {
+  margin-left: 0;
+  border-radius: 0 99em 99em 0;
 }
 
 .toolbar button:disabled {
-  opacity: 0.4;
+  opacity: 0.2;
 }
 
 .toolbar canvas {

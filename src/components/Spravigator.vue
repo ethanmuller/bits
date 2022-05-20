@@ -6,6 +6,8 @@ const store = usePxStore()
 
 const props = defineProps(['theme'])
 
+let isMouseDown = false
+
 store.$subscribe((mutation, state) => {
   updateCanvas()
 })
@@ -29,6 +31,34 @@ onMounted(() => {
 
   updateCanvas()
 })
+
+function mouseDown(e) {
+  isMouseDown = true
+
+  e.changedTouches = [{
+    clientX: e.clientX,
+    clientY: e.clientY,
+  }]
+
+  touchStart(e)
+}
+
+function mouseUp(e) {
+  isMouseDown = false
+}
+
+function mouseMove(e) {
+  if (!isMouseDown) {
+    return
+  }
+
+  e.changedTouches = [{
+    clientX: e.clientX,
+    clientY: e.clientY,
+  }]
+
+  touchMove(e)
+}
 
 function touchStart(e) {
   var rect = e.target.getBoundingClientRect();
@@ -95,7 +125,17 @@ function updateCanvas() {
 </script>
 
 <template>
-  <canvas ref="nav" class="spravigator" width="81" height="27" v-on:touchstart.prevent.disablePassive="touchStart" v-on:touchmove.prevent.disablePassive="touchMove" :style="{ background: store.themes[store.currentTheme].bg }"></canvas>
+  <canvas
+    ref="nav"
+    class="spravigator"
+    width="81"
+    height="27"
+    @mousedown="mouseDown"
+    @mouseup="mouseUp"
+    @mousemove="mouseMove"
+    v-on:touchstart.prevent.disablePassive="touchStart"
+    v-on:touchmove.prevent.disablePassive="touchMove"
+    :style="{ background: store.themes[store.currentTheme].bg }"></canvas>
 </template>
 
 <style>

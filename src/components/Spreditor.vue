@@ -111,19 +111,6 @@ function setupAudio(e) {
   state.isAudioSetup = true
 }
 
-function mouseMove(e) {
-  if (!isMouseDown) {
-    return
-  }
-
-  e.changedTouches = [{
-    clientX: e.clientX,
-    clientY: e.clientY,
-  }]
-
-  touchMove(e)
-}
-
 function touchMove(e) {
   var rect = e.target.getBoundingClientRect();
 
@@ -200,6 +187,19 @@ function mouseUp(e) {
   isMouseDown = false
 }
 
+function mouseMove(e) {
+  if (!isMouseDown) {
+    return
+  }
+
+  e.changedTouches = [{
+    clientX: e.clientX,
+    clientY: e.clientY,
+  }]
+
+  touchMove(e)
+}
+
 function draw(x,y) {
     sfx.bit(x, y, state.c)
     store.pset(x+store.pan[0]*9, y+store.pan[1]*9, state.c)
@@ -261,9 +261,8 @@ function updateCanvas() {
   width: 100%;
   margin: 0;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   image-rendering: pixelated;
 
   touch-action: manipulation;
