@@ -2,6 +2,7 @@ const fs = require('fs')
 const socket = require("socket.io");
 const path = require('path')
 const express = require('express')
+const { createServer: createViteServer } = require('vite')
 
 const w = 89
 const h = 89
@@ -56,10 +57,7 @@ async function createServer() {
 
   const server = app.listen(PORT)
   console.log(`listening on port ${PORT}`)
-  const io = socket(server, {
-    // allowEIO3: true,
-    // cors: {credentials: true, origin: 'http://localhost:3000'},
-  });
+  const io = socket(server, {});
 
   io.on("connection", function (socket) {
 
@@ -92,14 +90,19 @@ async function createServer() {
       socket.broadcast.emit("theme changed", currentTheme);
     });
 
-    socket.on("pset", function (x,y,c) {
-      pset(x,y,c)
-      socket.broadcast.emit("updatePx", x,y,c);
+    socket.on("pset", function (x,y, pan, c) {
+      pset(x+pan[0]*9, y+pan[1]*9, c)
+      socket.broadcast.emit("updatePx", x,y,pan,c);
     });
     socket.on("chunkSet", function (panX, panY, chunkPx) {
       chunkSet(panX, panY, chunkPx)
       socket.broadcast.emit("updateChunk", panX, panY, chunkPx);
     })
+
+    socket.on("sfx", function (sfk) {
+      socket.broadcast.emit("sfx", sfk);
+    })
+
   });
 }
 
