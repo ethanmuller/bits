@@ -138,12 +138,28 @@ function getEditedChunk() {
   return chunk
 }
 
+function copyToSystemClipboard(str) {
+  const el = document.createElement('textarea');  // create a temporary element to hold the text
+  el.value = str;                                 // set the element's value to the string
+  document.body.appendChild(el);                  // add the element to the DOM
+  el.select();                                    // select the text in the element
+  document.execCommand('copy');                    // copy the selected text
+  document.body.removeChild(el);                  // remove the element from the DOM
+}
+
 function cut() {
+  let str = '';
   for (let y = 0; y < store.clipboard.length; y++) {
     for (let x = 0; x < store.clipboard.length; x++) {
+      str += store.px[y + store.pan[1]*9][x + store.pan[0]*9] ? '#' : '.'
       store.clipboard[y][x] = store.px[y + store.pan[1]*9][x + store.pan[0]*9]
+      if (x == store.clipboard.length - 1) {
+        str += '\n'
+      }
     }
   }
+  console.log(str)
+  copyToSystemClipboard(str)
 
   clear()
   sfx.down()
