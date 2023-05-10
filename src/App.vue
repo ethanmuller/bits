@@ -192,6 +192,10 @@ function randomize() {
   store.socket.emit('sfx', 'csh')
 }
 
+function capture() {
+  sfx.capture()
+}
+
 function paste() {
   store.chunkSet(store.pan[0]*9, store.pan[1]*9, store.clipboard)
   store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, store.clipboard)
@@ -266,6 +270,15 @@ function windowReturn() {
       <button class="arrow-btn arrow-btn--vertical" @click="ass(0, -1)">↑</button>
       <button class="arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
     </div>
+
+    <div class="capture">
+        <button class="toolbar-btn capture-btn" @click="capture">
+            <span class="a"></span>
+            <span class="b"></span>
+            <span class="c"></span>
+            <span class="d"></span>
+        </button>
+    </div>
   </div>
 
   <div class="palettes" :style="{ color: store.themes[store.currentTheme].fg }">
@@ -297,7 +310,6 @@ function windowReturn() {
   margin-top: 0.5em;
 }
 .palettes button {
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   display: flex;
   background: transparent;
   border: none;
@@ -345,27 +357,35 @@ function windowReturn() {
   flex-direction: row;
   justify-content: stretch;
   align-items: space-between;
-  min-height: 5em;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.capture {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5rem;
+  padding-bottom: 12rem;
 }
 
 .arrows {
   display: flex;
   flex-direction: row;
   justify-content: stretch;
-  min-height: 5em;
   position: relative;
   z-index: 1;
 }
 
 .toolbar-btn {
   padding: 0;
-  margin: 0 0.25em;
+  margin: 0 0.125em;
   border: none;
-  background: white;
+  background: #fff;
   color: black;
   overflow: hidden;
-  font-size: 1em;
+  font-size: 2em;
 
   touch-action: manipulation;
 
@@ -376,16 +396,11 @@ function windowReturn() {
   width: 4.625rem;
   height: 4.625rem;
 
-  border-radius: 50px;
-  background: #f6f5f4;
-  box-shadow:  -20px 20px 60px #d1d0cf,
-               20px -20px 60px #ffffff;
+  border-radius: 5px;
 }
 
 .toolbar-btn:active {
-  background: #f6f5f4;
-  box-shadow: inset -20px 20px 60px #d1d0cf,
-              inset 20px -20px 60px #ffffff;
+    background: #ff0;
 }
 
 .arrow-btn {
@@ -411,29 +426,24 @@ function windowReturn() {
   height: 4.625rem;
 
   border-radius: 50px;
-  background: #f6f5f4;
-  box-shadow:  -20px 20px 60px #d1d0cf,
-               20px -20px 60px #ffffff;
+  background: #ddd;
 }
 
 .arrow-btn:nth-child(1) {
-  border-radius: 99em 0 0 99em;
+  border-radius: 5px 0 0 5px;
 }
 
 .arrow-btn:nth-child(2), .arrow-btn:nth-child(3) {
   border-radius: 0;
-  box-shadow: none;
   z-index: 1;
 }
 
 .arrow-btn:nth-child(4) {
-  border-radius: 0 99em 99em 0;
+  border-radius: 0 5px 5px 0;
 }
 
 .arrow-btn:active {
-  background: #f6f5f4;
-  box-shadow: inset -20px 20px 60px #d1d0cf,
-              inset 20px -20px 60px #ffffff;
+  background: #ccc;
 }
 
 .arrow-btn--horizontal {
@@ -443,13 +453,49 @@ function windowReturn() {
 .cut-btn {
   margin-left: auto;
   margin-right: 0;
-  border-radius: 99rem 0 0 99rem;
   z-index: 1;
+  border-radius: 5px 0 0 5px;
 }
 
 .clipboard-btn {
   margin-left: 0;
-  border-radius: 0 99em 99em 0;
+  border-radius: 0 5px 5px 0;
+}
+
+.capture-btn {
+    position: relative;
+}
+
+.capture-btn > span {
+    display: block;
+    position: absolute;
+    border: solid black;
+    width: 6px;
+    height: 6px;
+}
+
+.capture-btn .a {
+    border-width: 3px 0 0 3px;
+    top: 1.2rem;
+    left: 1.2rem;
+}
+
+.capture-btn .b {
+    border-width: 0 0 3px 3px;
+    bottom: 1.2rem;
+    left: 1.2rem;
+}
+
+.capture-btn .c {
+    border-width: 3px 3px 0 0;
+    top: 1.2rem;
+    right: 1.2rem;
+}
+
+.capture-btn .d {
+    border-width: 0 3px 3px 0;
+    bottom: 1.2rem;
+    right: 1.2rem;
 }
 
 .toolbar button:disabled {
@@ -459,8 +505,8 @@ function windowReturn() {
 .toolbar canvas {
   display: block;
   image-rendering: pixelated;
-  width: 36px;
-  height: 36px;
+  width: 64px;
+  height: 64px;
 }
 
 </style>

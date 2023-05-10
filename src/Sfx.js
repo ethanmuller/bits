@@ -28,6 +28,18 @@ const navSynth = new Tone.Synth({
   },
 }).toDestination();
 
+const captureSynth = new Tone.Synth({
+  oscillator: {
+    type: 'sine',
+  },
+  envelope: {
+    attack: 0.001,
+    decay: 0.01,
+    sustain: 0,
+    release: 0,
+  },
+}).toDestination();
+
 const clipboardSynth = new Tone.Synth({
   oscillator: {
     type: 'sine',
@@ -98,5 +110,10 @@ export const sfx = {
     filter.frequency.rampTo(600 + Math.random()*9000, 0.2)
 
     noiseSynth.triggerAttackRelease("8n");
+  },
+  capture() {
+    captureSynth.triggerAttackRelease("B5", "8n", "+0.0");
+    captureSynth.triggerAttackRelease("E5", "8n", "+0.05");
+    captureSynth.triggerAttackRelease("C6", "8n", "+0.1");
   },
 }
