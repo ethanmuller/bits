@@ -44,24 +44,16 @@ function pget(x, y) {
 async function createServer() {
   const app = express()
 
-  // Create Vite server in middleware mode. This disables Vite's own HTML
-  // serving logic and let the parent server take control.
-  //
-  // In middleware mode, if you want to use Vite's own HTML serving logic
-  // use `'html'` as the `middlewareMode` (ref https://vitejs.dev/config/#server-middlewaremode)
+  // Configure Vite to use the same port
   const vite = await createViteServer({
-    server: { middlewareMode: 'ssr' }
+    server: { 
+      middlewareMode: 'html',
+      port: PORT,
+      strictPort: true // Force Vite to use our specified port
+    }
   })
   // use vite's connect instance as middleware
   app.use(vite.middlewares)
-
-  app.use('/', (req, res) => {
-    let template = fs.readFileSync(
-      path.resolve(__dirname, 'index.html'),
-      'utf-8'
-    )
-    res.send(template)
-  })
 
   const server = app.listen(PORT)
   console.log(`listening on port ${PORT}`)
