@@ -19,6 +19,9 @@ let isMouseDown = false
 
 let lastX, lastY
 
+let lastDrawX = null
+let lastDrawY = null
+
 let synth, synth2, synth3
 
 const state = reactive({
@@ -111,9 +114,30 @@ function setupAudio(e) {
   state.isAudioSetup = true
 }
 
+function drawLine(x0, y0, x1, y1, color) {
+  const dx = Math.abs(x1 - x0)
+  const dy = Math.abs(y1 - y0)
+  const sx = x0 < x1 ? 1 : -1
+  const sy = y0 < y1 ? 1 : -1
+  let err = dx - dy
+
+  while (true) {
+    draw(x0, y0)
+    if (x0 === x1 && y0 === y1) break
+    const e2 = 2 * err
+    if (e2 > -dy) {
+      err -= dy
+      x0 += sx
+    }
+    if (e2 < dx) {
+      err += dx
+      y0 += sy
+    }
+  }
+}
+
 function touchMove(e) {
   var rect = e.target.getBoundingClientRect();
-
   var tx = e.changedTouches[0].clientX - rect.left;
   var ty = e.changedTouches[0].clientY - rect.top;
 
@@ -126,17 +150,19 @@ function touchMove(e) {
   }
 
 
-  // if changed from last position, draw
+  // if changed from last position, draw line
   if (x !== lastX || y !== lastY) {
-
-    if (store.pget(x,y) === state.c) {
-      return
+    if (lastDrawX !== null && lastDrawY !== null) {
+      drawLine(lastDrawX, lastDrawY, x, y, state.c)
+    } else {
+      draw(x, y)
     }
-    draw(x,y)
   }
 
   lastX = x
   lastY = y
+  lastDrawX = x
+  lastDrawY = y
 }
 
 function handleMousedown(e) {
@@ -151,25 +177,28 @@ function handleMousemove(e) {
 }
 
 function touchStart(e) {
-  var rect = e.target.getBoundingClientRect();
-
-  var tx = e.changedTouches[0].clientX - rect.left;
-  var ty = e.changedTouches[0].clientY - rect.top;
+  var rect = e.target.getBoundingClientRect()
+  var tx = e.changedTouches[0].clientX - rect.left
+  var ty = e.changedTouches[0].clientY - rect.top
 
   const x = Math.floor(tx/rect.width*props.width)
   const y = Math.floor(ty/rect.height*props.width)
 
-  if (x < 0 || y < 0 ||
-    x >= props.width || y >= props.height) {
+  if (x < 0 || y < 0 || x >= props.width || y >= props.height) {
     return
   }
 
+  // Reset drawing state
+  lastDrawX = null
+  lastDrawY = null
+  
   state.c = store.pget(x,y) === 1 ? 0 : 1
-
   draw(x,y)
 
   lastX = x
   lastY = y
+  lastDrawX = x
+  lastDrawY = y
 }
 
 function mouseDown(e) {
@@ -185,6 +214,7 @@ function mouseDown(e) {
 
 function mouseUp(e) {
   isMouseDown = false
+  touchEnd(e)
 }
 
 function mouseMove(e) {
@@ -201,10 +231,15 @@ function mouseMove(e) {
 }
 
 function draw(x,y) {
-    sfx.bit(x, y, state.c)
-    store.pset(x+store.pan[0]*9, y+store.pan[1]*9, state.c)
-    store.socket.emit('pset', x, y, store.pan, state.c)
-    updateCanvas()
+    // Only play sound and emit if the pixel value is actually changing
+    const currentValue = store.pget(x, y)
+    
+    if (currentValue !== state.c) {
+        sfx.bit(x, y, state.c)
+        store.pset(x + store.pan[0]*9, y + store.pan[1]*9, state.c)
+        store.socket.emit('pset', x, y, store.pan, state.c)
+        updateCanvas()
+    }
 }
 
 function playSound(x,y) {
@@ -238,6 +273,14 @@ function updateCanvas() {
   }
 }
 
+// Add touchEnd function
+function touchEnd(e) {
+    lastDrawX = null
+    lastDrawY = null
+    lastX = null
+    lastY = null
+}
+
 </script>
 
 <template>
@@ -251,6 +294,7 @@ function updateCanvas() {
     @mousemove="mouseMove"
     v-on:touchstart.prevent="touchStart"
     v-on:touchmove.prevent="touchMove"
+    v-on:touchend.prevent="touchEnd"
     :style="{ background: store.themes[store.currentTheme].hl }"
     ></canvas>
 </template>
