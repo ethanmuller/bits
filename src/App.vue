@@ -138,15 +138,6 @@ function getEditedChunk() {
   return chunk
 }
 
-function copyToSystemClipboard(str) {
-  const el = document.createElement('textarea');  // create a temporary element to hold the text
-  el.value = str;                                 // set the element's value to the string
-  document.body.appendChild(el);                  // add the element to the DOM
-  el.select();                                    // select the text in the element
-  document.execCommand('copy');                    // copy the selected text
-  document.body.removeChild(el);                  // remove the element from the DOM
-}
-
 function cut() {
   let str = '';
   for (let y = 0; y < store.clipboard.length; y++) {
@@ -159,7 +150,6 @@ function cut() {
     }
   }
   console.log(str)
-  copyToSystemClipboard(str)
 
   clear()
   sfx.down()
