@@ -58,9 +58,14 @@ async function createServer() {
   const server = app.listen(PORT)
   console.log(`listening on port ${PORT}`)
   const io = socket(server, {
-    // allowEIO3: true,
-    // cors: {credentials: true, origin: 'http://localhost:3000'},
+    path: '/bitter-socket/',
+    cors: {
+      origin: process.env.NODE_ENV === 'production' ? false : 'http://localhost:3333',
+      methods: ["GET", "POST"]
+    },
+    transports: ['websocket']
   });
+  
 
   io.on("connection", function (socket) {
 

@@ -21,7 +21,12 @@ export const usePxStore = defineStore('main', {
     return {
       px: createEmptyGrid(81, 27),
       clipboard: createEmptyGrid(9, 9),
-      socket: io(),
+      socket: io(window.location.origin, {
+        path: '/bitter-socket/',
+        transports: ['websocket'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+      }),
       pan: [4, 1],
       i: 0,
       currentTheme: 'electric',
