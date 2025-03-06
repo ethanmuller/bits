@@ -253,6 +253,9 @@ onMounted(() => {
   state.ctx = pad.value.getContext('2d')
 
   updateCanvas()
+  
+  // Add global mouseup listener
+  window.addEventListener('mouseup', mouseUp)
 })
 
 function updateCanvas() {
@@ -281,6 +284,34 @@ function touchEnd(e) {
     lastY = null
 }
 
+function mouseLeave(e) {
+  // Save the last position before leaving
+  const rect = e.target.getBoundingClientRect()
+  const x = Math.floor((e.clientX - rect.left)/rect.width*props.width)
+  const y = Math.floor((e.clientY - rect.top)/rect.height*props.width)
+  
+  if (x >= 0 && x < props.width && y >= 0 && y < props.height) {
+    lastX = x
+    lastY = y
+  }
+}
+
+function mouseEnter(e) {
+  if (isMouseDown) {
+    const rect = e.target.getBoundingClientRect()
+    const x = Math.floor((e.clientX - rect.left)/rect.width*props.width)
+    const y = Math.floor((e.clientY - rect.top)/rect.height*props.width)
+    
+    if (x >= 0 && x < props.width && y >= 0 && y < props.height) {
+      // Just set the new position without drawing a line
+      lastX = x
+      lastY = y
+      lastDrawX = x
+      lastDrawY = y
+    }
+  }
+}
+
 </script>
 
 <template>
@@ -292,6 +323,8 @@ function touchEnd(e) {
     @mousedown="mouseDown"
     @mouseup="mouseUp"
     @mousemove="mouseMove"
+    @mouseleave="mouseLeave"
+    @mouseenter="mouseEnter"
     v-on:touchstart.prevent="touchStart"
     v-on:touchmove.prevent="touchMove"
     v-on:touchend.prevent="touchEnd"
