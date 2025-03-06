@@ -58,7 +58,7 @@ async function createServer() {
   const server = app.listen(PORT)
   console.log(`listening on port ${PORT}`)
   const io = socket(server, {
-    path: '/bitter-socket/',
+    path: '/bitter/socket/',
     cors: {
       origin: process.env.NODE_ENV === 'production' ? false : 'http://localhost:3333',
       methods: ["GET", "POST"]
