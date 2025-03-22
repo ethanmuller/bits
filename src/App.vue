@@ -5,6 +5,7 @@ import Spravigator from './components/Spravigator.vue'
 import { usePxStore } from './stores/PxStore.js'
 import { sfx } from './Sfx.js'
 import * as Tone from 'tone'
+import { viewWidth, viewHeight, imageWidth, imageHeight } from './dimensions'
 
 const store = usePxStore()
 
