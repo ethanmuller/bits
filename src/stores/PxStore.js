@@ -103,5 +103,28 @@ export const usePxStore = defineStore('main', {
     changeTheme(t) {
       this.currentTheme = t
     },
+    clearView() {
+      const f = new Array(9)
+
+      for (let y = 0; y < 9; y++) {
+        f[y] = []
+
+        for (let x = 0; x < 9; x++) {
+          f[y][x] = 0
+        }
+      }
+
+
+      this.chunkSet(this.pan[0]*9, this.pan[1]*9, f)
+    },
+    cut() {
+      for (let y = 0; y < this.clipboard.length; y++) {
+        for (let x = 0; x < this.clipboard.length; x++) {
+          this.clipboard[y][x] = this.px[y + this.pan[1]*9][x + this.pan[0]*9]
+        }
+      }
+
+      this.clearView()
+    }
   },
 })

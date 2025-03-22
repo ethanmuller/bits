@@ -70,18 +70,7 @@ function updateCanvas() {
 }
 
 function clear() {
-  const f = new Array(9)
-
-  for (let y = 0; y < 9; y++) {
-    f[y] = []
-
-    for (let x = 0; x < 9; x++) {
-      f[y][x] = 0
-    }
-  }
-
-
-  store.chunkSet(store.pan[0]*9, store.pan[1]*9, f)
+  store.clearView()
   store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, f)
 }
 
@@ -139,13 +128,7 @@ function getEditedChunk() {
 }
 
 function cut() {
-  for (let y = 0; y < store.clipboard.length; y++) {
-    for (let x = 0; x < store.clipboard.length; x++) {
-      store.clipboard[y][x] = store.px[y + store.pan[1]*9][x + store.pan[0]*9]
-    }
-  }
-
-  clear()
+  store.cut()
   sfx.down()
   store.socket.emit('sfx', 'down')
 }
@@ -236,19 +219,19 @@ function windowReturn() {
     <div class="toolbar">
 
       <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
-      <button class="neo-btn toolbar-btn rando-btn" @click="randomize">🎲</button>
-      <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span :style="{ transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></button>
-      <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getEditedChunk())">✂️</button>
+      <button class="neo-btn toolbar-btn rando-btn" @click="randomize"><span class="neo-btn__inner">🎲</span></button>
+      <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></span></button>
+      <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getEditedChunk())"><span class="neo-btn__inner">✂️</span></button>
       <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
-        <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
+        <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }" class="neo-btn__inner"></canvas>
       </button>
     </div>
     <div class="navigator">
       <div class="arrows">
-        <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)">←</button>
-        <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="ass(0, 1)">↓</button>
-        <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="ass(0, -1)">↑</button>
-        <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
+        <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)"><span class="neo-btn__inner">←</span></button>
+        <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="ass(0, 1)"><span class="neo-btn__inner">↓</span></button>
+        <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="ass(0, -1)"><span class="neo-btn__inner">↑</span></button>
+        <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="ass(1, 0)"><span class="neo-btn__inner">→</span></button>
       </div>
       <Spravigator />
     </div>
@@ -397,6 +380,15 @@ function windowReturn() {
   transition-duration: 0s;
   background: #eaeaea;
   box-shadow: 0 0 #ffffffc2, 0 0 #ffffffb3, 0 0 #00000012, 0 0 #00000007, 0 0 #0000000c, 0 0 #0000000d, 0 0 #0000000d, inset -1px 1px 3px #0000001a, inset 1px -1px 3px #fff3;
+}
+.neo-btn__inner {
+  display: inline-block;
+  transition: .7s all ease-out;
+  transform: scale(1);
+}
+.neo-btn:active .neo-btn__inner {
+  transform: scale(.8);
+  transition-duration: 0s;
 }
 
 .toolbar-btn {
