@@ -139,17 +139,11 @@ function getEditedChunk() {
 }
 
 function cut() {
-  let str = '';
   for (let y = 0; y < store.clipboard.length; y++) {
     for (let x = 0; x < store.clipboard.length; x++) {
-      str += store.px[y + store.pan[1]*9][x + store.pan[0]*9] ? '#' : '.'
       store.clipboard[y][x] = store.px[y + store.pan[1]*9][x + store.pan[0]*9]
-      if (x == store.clipboard.length - 1) {
-        str += '\n'
-      }
     }
   }
-  console.log(str)
 
   clear()
   sfx.down()
