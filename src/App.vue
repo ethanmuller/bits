@@ -238,7 +238,6 @@ function windowReturn() {
 
 <template>
   <div class="wrapper">
-    <Spravigator />
     <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
     <div class="toolbar">
 
@@ -250,11 +249,14 @@ function windowReturn() {
         <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
       </button>
     </div>
-    <div class="arrows">
-      <button class="neo-btn arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)">←</button>
-      <button class="neo-btn arrow-btn arrow-btn--vertical" @click="ass(0, 1)">↓</button>
-      <button class="neo-btn arrow-btn arrow-btn--vertical" @click="ass(0, -1)">↑</button>
-      <button class="neo-btn arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
+    <div class="navigator">
+      <div class="arrows">
+        <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)">←</button>
+        <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="ass(0, 1)">↓</button>
+        <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="ass(0, -1)">↑</button>
+        <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
+      </div>
+      <Spravigator />
     </div>
   </div>
 
@@ -337,21 +339,51 @@ function windowReturn() {
   align-items: space-between;
   min-height: 5em;
   margin-top: 0.25rem;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+.navigator {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-right: 0.5rem;
+  align-items: end;
 }
 
 .arrows {
-  display: flex;
-  flex-direction: row;
-  justify-content: stretch;
+  padding: 0 0.5rem;
+  display: grid;
+  grid-auto-rows: 48px;
+  grid-template-columns: 48px 48px 48px;
+  grid-template-areas: "tl t tr"
+                       "bl b br";
   min-height: 5em;
   position: relative;
   z-index: 1;
+  gap: 0.5rem;
+}
+
+.arrows .t {
+  grid-area: t;
+}
+.arrows .bl {
+  grid-area: bl;
+  position: relative;
+    z-index: 2;
+}
+.arrows .b {
+  grid-area: b;
+  position: relative;
+    z-index: 1;
+}
+.arrows .br {
+  grid-area: br;
 }
 
 .neo-btn {
   font-size: 1em;
   padding: 0;
-  margin: 0 0.25em;
+  margin: 0;
   overflow: hidden;
   touch-action: manipulation;
 
@@ -390,8 +422,8 @@ function windowReturn() {
 
   line-height: 0;
 
-  width: 3.625rem;
-  height: 3.625rem;
+  width: 100%;
+  height: 100%;
 
   background: #f6f5f4;
 }
