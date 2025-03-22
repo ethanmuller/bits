@@ -3,6 +3,7 @@ import { reactive, ref, onMounted } from 'vue'
 import * as Tone from 'tone'
 import { usePxStore } from '../stores/PxStore.js'
 import { sfx } from '../Sfx.js'
+import { viewWidth, viewHeight, imageWidth, imageHeight } from '../dimensions'
 
 const store = usePxStore()
 
@@ -55,7 +56,7 @@ store.socket.on('updatePx', (x,y,pan,c) => {
     //synth3.triggerAttackRelease(500, "64n");
   } catch(e) {
   }
-  store.pset(x+pan[0]*9, y+pan[1]*9, c)
+  store.pset(x+pan[0]*viewWidth, y+pan[1]*viewHeight, c)
   updateCanvas()
 })
 
@@ -236,7 +237,7 @@ function draw(x,y) {
     
     if (currentValue !== state.c) {
         sfx.bit(x, y, state.c)
-        store.pset(x + store.pan[0]*9, y + store.pan[1]*9, state.c)
+        store.pset(x + store.pan[0]*viewWidth, y + store.pan[1]*viewHeight, state.c)
         store.socket.emit('pset', x, y, store.pan, state.c)
         updateCanvas()
     }

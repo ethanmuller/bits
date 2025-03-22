@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
 import { usePxStore } from '../stores/PxStore.js'
+import { viewWidth, viewHeight, imageWidth, imageHeight } from '../dimensions'
 
 const store = usePxStore()
 
@@ -66,11 +67,11 @@ function touchStart(e) {
   var tx = e.changedTouches[0].clientX - rect.left;
   var ty = e.changedTouches[0].clientY - rect.top;
 
-  const x = Math.floor(tx/rect.width*9)
-  const y = Math.floor(ty/rect.height*3)
+  const x = Math.floor(tx/rect.width*(imageWidth/viewWidth))
+  const y = Math.floor(ty/rect.height*(imageHeight/viewHeight))
 
   if (x < 0 || y < 0 ||
-    x >= 9 || y >= 3) {
+    x >= (imageWidth/viewWidth) || y >= (imageHeight/viewHeight)) {
     return
   }
 
@@ -86,11 +87,11 @@ function touchMove(e) {
   var tx = e.changedTouches[0].clientX - rect.left;
   var ty = e.changedTouches[0].clientY - rect.top;
 
-  const x = Math.floor(tx/rect.width*9)
-  const y = Math.floor(ty/rect.height*3)
+  const x = Math.floor(tx/rect.width*(imageWidth/viewWidth))
+  const y = Math.floor(ty/rect.height*(imageHeight/viewHeight))
 
   if (x < 0 || y < 0 ||
-    x >= 9 || y >= 3) {
+    x >= (imageWidth/viewWidth) || y >= (imageHeight/viewHeight)) {
     return
   }
 
@@ -106,11 +107,11 @@ function updateCanvas() {
   const pxColor = store.themes[store.currentTheme].fg
   const hlColor = store.themes[store.currentTheme].hl
 
-  state.ctx.clearRect(0, 0, 81, 27)
+  state.ctx.clearRect(0, 0, imageWidth, imageHeight)
   state.ctx.fillStyle = pxColor
 
-  for (let y = 0; y < 27; y++) {
-    for (let x = 0; x < 81; x++) {
+  for (let y = 0; y < imageHeight; y++) {
+    for (let x = 0; x < imageWidth; x++) {
       const v = store.px[y][x]
       if (v === 1) {
         state.ctx.fillRect(x,y,1,1)
@@ -120,7 +121,7 @@ function updateCanvas() {
 
   state.ctx.globalCompositeOperation = 'destination-over'
   state.ctx.fillStyle = hlColor
-  state.ctx.fillRect(store.pan[0]*9, store.pan[1]*9, 9, 9)
+  state.ctx.fillRect(store.pan[0]*viewWidth, store.pan[1]*viewHeight, viewWidth, viewHeight)
 }
 </script>
 
@@ -128,8 +129,8 @@ function updateCanvas() {
   <canvas
     ref="nav"
     class="spravigator"
-    width="81"
-    height="27"
+    :width="imageWidth"
+    :height="imageHeight"
     @mousedown="mouseDown"
     @mouseup="mouseUp"
     @mousemove="mouseMove"

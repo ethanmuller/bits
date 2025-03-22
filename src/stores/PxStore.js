@@ -1,6 +1,8 @@
 import { sfx } from '../Sfx.js'
 import { defineStore } from "pinia";
 import { io } from 'socket.io-client'
+import { viewWidth, viewHeight, imageWidth, imageHeight } from '../dimensions'
+
 
 function createEmptyGrid(width, height) {
   const grid = new Array(height)
@@ -19,15 +21,15 @@ function createEmptyGrid(width, height) {
 export const usePxStore = defineStore('main', {
   state() {
     return {
-      px: createEmptyGrid(81, 27),
-      clipboard: createEmptyGrid(9, 9),
+      px: createEmptyGrid(imageWidth, imageHeight),
+      clipboard: createEmptyGrid(viewWidth, viewHeight),
       socket: io(window.location.origin, {
         path: '/bitter/socket/',
         transports: ['websocket'],
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
       }),
-      pan: [4, 1],
+      pan: [0,0],
       i: 0,
       currentTheme: 'electric',
       themes: {
@@ -86,15 +88,15 @@ export const usePxStore = defineStore('main', {
     },
     setPan(x, y) {
       if (x < 0) {
-        x = 8
+        x = imageWidth/viewWidth-1
       }
 
       if (y < 0) {
-        y = 2
+        y = imageHeight/viewHeight-1
       }
 
-      this.pan[0] = x % 9
-      this.pan[1] = y % 3
+      this.pan[0] = x % (imageWidth/viewWidth)
+      this.pan[1] = y % (imageHeight/viewHeight)
 
       sfx.nav()
     },
