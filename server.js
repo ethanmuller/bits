@@ -68,11 +68,13 @@ async function createServer() {
   
 
   io.on("connection", function (socket) {
-
+    const clientsList = Array.from(io.sockets.sockets.keys());
+    io.emit('player list', clientsList)
     console.log(`join ${socket.id} @ ${new Date().toLocaleString()}`);
 
     socket.on("join", function (cb) {
-      cb({px, currentTheme})
+      const clientsList = Array.from(io.sockets.sockets.keys());
+      cb({px, currentTheme, clientsList})
     });
 
     socket.on("clear", function (cb) {
@@ -86,7 +88,6 @@ async function createServer() {
         }
       }
 
-      console.log(out)
       console.log(`cleared by ${socket.id} @ ${new Date().toLocaleString()}`)
 
       resetPx()
@@ -109,6 +110,11 @@ async function createServer() {
 
     socket.on("sfx", function (sfk) {
       socket.broadcast.emit("sfx", sfk);
+    })
+    socket.on('disconnect', (reason) => {
+      console.log(`disconnect: ${socket.id} @ ${new Date().toLocaleString()}, reason: ${reason}`)
+      const clientsList = Array.from(io.sockets.sockets.keys());
+      socket.broadcast.emit('player list', clientsList)
     })
 
   });

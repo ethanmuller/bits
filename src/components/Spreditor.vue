@@ -49,7 +49,6 @@ store.socket.on('updateAll', (px) => {
 })
 store.socket.on('updatePx', (x,y,pan,c) => {
   sfx.bit(x, y, c)
-  console.log(x,y,pan,c)
   //playSound(x,y)
 
   try {

@@ -9,6 +9,8 @@ import { viewWidth, viewHeight, imageWidth, imageHeight } from './dimensions'
 
 const store = usePxStore()
 
+const clientsList = ref([])
+
 store.$subscribe((mutation, s) => {
   updateCanvas()
 })
@@ -99,7 +101,7 @@ function isChunkEmpty(chunk) {
 }
 
 function invert() {
-  const chunk = getEditedChunk()
+  const chunk = getViewedChunk()
 
   const height = chunk.length
   const width = chunk[0].length
@@ -118,7 +120,7 @@ function invert() {
   store.socket.emit('sfx', 'bwip')
 }
 
-function getEditedChunk() {
+function getViewedChunk() {
   const chunk = store.px.slice(store.pan[1]*9, store.pan[1]*9+9)
 
   for (let y = 0; y < 9; y++) {
@@ -139,7 +141,7 @@ function ass(x,y) {
 }
 
 function randomize() {
-  const chunk = getEditedChunk()
+  const chunk = getViewedChunk()
 
   const height = chunk.length
   const width = chunk[0].length
@@ -198,6 +200,11 @@ store.socket.on('theme changed', (themeName) => {
   }
 })
 
+store.socket.on('player list', (list) => {
+  //clientsList.value = list.filter((i) => i !== store.socket.id)
+  clientsList.value = list
+})
+
 function windowLeave() {
 }
 
@@ -207,6 +214,7 @@ function windowReturn() {
   store.socket.emit('join', (data) => {
     store.px = data.px
     updateCanvas()
+    clientsList.value = list
   })
 }
 
@@ -216,25 +224,34 @@ function windowReturn() {
 
 <template>
   <div class="wrapper">
-    <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
-    <div class="toolbar">
-
-      <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
-      <button class="neo-btn toolbar-btn rando-btn" @click="randomize"><span class="neo-btn__inner">🎲</span></button>
-      <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></span></button>
-      <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getEditedChunk())"><span class="neo-btn__inner">✂️</span></button>
-      <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
-        <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }" class="neo-btn__inner"></canvas>
-      </button>
+    <div class="status-bar" v-if="store.socket.connected">
+      <div><span class="indicator positive"></span> Connected</div>
+      <div>Users online: {{clientsList.length}}</div>
     </div>
-    <div class="navigator">
-      <div class="arrows">
-        <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)"><span class="neo-btn__inner">←</span></button>
-        <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="ass(0, 1)"><span class="neo-btn__inner">↓</span></button>
-        <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="ass(0, -1)"><span class="neo-btn__inner">↑</span></button>
-        <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="ass(1, 0)"><span class="neo-btn__inner">→</span></button>
+    <div class="status-bar" v-else>
+      <div><span class="indicator warning"></span> Connecting...</div>
+    </div>
+    <div :style="{ opacity: store.socket.connected ? 1 : 0.5, transition: 'all 1s ease-out'}">
+      <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
+      <div class="toolbar">
+
+        <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
+        <button class="neo-btn toolbar-btn rando-btn" @click="randomize"><span class="neo-btn__inner">🎲</span></button>
+        <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></span></button>
+        <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getViewedChunk())"><span class="neo-btn__inner">✂️</span></button>
+        <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
+          <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }" class="neo-btn__inner"></canvas>
+        </button>
       </div>
-      <Spravigator />
+      <div class="navigator">
+        <div class="arrows">
+          <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)"><span class="neo-btn__inner">←</span></button>
+          <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="ass(0, 1)"><span class="neo-btn__inner">↓</span></button>
+          <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="ass(0, -1)"><span class="neo-btn__inner">↑</span></button>
+          <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="ass(1, 0)"><span class="neo-btn__inner">→</span></button>
+        </div>
+        <Spravigator />
+      </div>
     </div>
   </div>
 
@@ -324,6 +341,7 @@ function windowReturn() {
   display: grid;
   grid-template-columns: 1fr 1fr;
   padding-right: 0.5rem;
+  padding-bottom: 3rem;
   align-items: end;
 }
 
@@ -432,6 +450,28 @@ function windowReturn() {
   image-rendering: pixelated;
   width: 36px;
   height: 36px;
+}
+
+.status-bar {
+  padding: 0.5rem;
+  font-family: monospace;
+  font-size: 0.7rem;
+  display: flex;
+  justify-content: space-between;
+}
+.indicator {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+}
+.indicator.positive {
+    background: green;
+}
+.indicator.warning {
+    background: #ffc800;;
+}
+.status-text {
+  opacity: 0.5;
 }
 
 </style>
