@@ -243,18 +243,18 @@ function windowReturn() {
     <div class="toolbar">
 
       <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
-      <button class="toolbar-btn rando-btn" @click="randomize">🎲</button>
-      <button class="toolbar-btn invert-btn" @click="invert"><span :style="{ transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></button>
-      <button class="toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getEditedChunk())">✂️</button>
-      <button class="toolbar-btn clipboard-btn" @click="paste">
+      <button class="neo-btn toolbar-btn rando-btn" @click="randomize">🎲</button>
+      <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span :style="{ transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></button>
+      <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getEditedChunk())">✂️</button>
+      <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
         <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }"></canvas>
       </button>
     </div>
     <div class="arrows">
-      <button class="arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)">←</button>
-      <button class="arrow-btn arrow-btn--vertical" @click="ass(0, 1)">↓</button>
-      <button class="arrow-btn arrow-btn--vertical" @click="ass(0, -1)">↑</button>
-      <button class="arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
+      <button class="neo-btn arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)">←</button>
+      <button class="neo-btn arrow-btn arrow-btn--vertical" @click="ass(0, 1)">↓</button>
+      <button class="neo-btn arrow-btn arrow-btn--vertical" @click="ass(0, -1)">↑</button>
+      <button class="neo-btn arrow-btn arrow-btn--horizontal" @click="ass(1, 0)">→</button>
     </div>
   </div>
 
@@ -348,98 +348,61 @@ function windowReturn() {
   z-index: 1;
 }
 
-.toolbar-btn {
+.neo-btn {
+  font-size: 1em;
   padding: 0;
   margin: 0 0.25em;
-  border: none;
-  background: white;
-  color: black;
   overflow: hidden;
-  font-size: 1em;
-
   touch-action: manipulation;
+
+  font-family: inherit;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #eee;
+  transition: .7s all ease-out;
+  box-shadow: 5.63px -5.63px 10.03px #ffffffc2, 1.04px -1.04px 3.62px #ffffffb3, -45px 45px 80px #00000012, -13.57px 13.5662px 24.1177px #00000007, -5.63px 5.6347px 10.0172px #0000000c, -2.04px 2.03796px 2.62304px #0000000d, -1.04px 1.03796px 3px #0000000d, inset -1px 1px 3px #0000, inset 1px -1px 3px #fff0;
 
   display: flex;
   align-items: center;
   justify-content: center;
-
-  width: 4.625rem;
-  height: 4.625rem;
-
-  border-radius: 50px;
-  background: #f6f5f4;
-  box-shadow:  -20px 20px 60px #d1d0cf,
-               20px -20px 60px #ffffff;
+}
+.neo-btn:active {
+  transition-duration: 0s;
+  background: #eaeaea;
+  box-shadow: 0 0 #ffffffc2, 0 0 #ffffffb3, 0 0 #00000012, 0 0 #00000007, 0 0 #0000000c, 0 0 #0000000d, 0 0 #0000000d, inset -1px 1px 3px #0000001a, inset 1px -1px 3px #fff3;
 }
 
-.toolbar-btn:active {
-  background: #f6f5f4;
-  box-shadow: inset -20px 20px 60px #d1d0cf,
-              inset 20px -20px 60px #ffffff;
+.toolbar-btn {
+
+  width: 48px;
+  height: 48px;
+
+  border-radius: 9px;
 }
 
 .arrow-btn {
   flex: 1;
-  padding: 0;
-  margin: 0;
-  border: none;
   color: #666;
-  overflow: hidden;
-
-  touch-action: manipulation;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   font-size: 1.5em;
   font-weight: bold;
 
   line-height: 0;
 
-  width: 4.625rem;
-  height: 4.625rem;
+  width: 3.625rem;
+  height: 3.625rem;
 
-  border-radius: 50px;
   background: #f6f5f4;
-  box-shadow:  -20px 20px 60px #d1d0cf,
-               20px -20px 60px #ffffff;
-}
-
-.arrow-btn:nth-child(1) {
-  border-radius: 99em 0 0 99em;
-}
-
-.arrow-btn:nth-child(2), .arrow-btn:nth-child(3) {
-  border-radius: 0;
-  box-shadow: none;
-  z-index: 1;
-}
-
-.arrow-btn:nth-child(4) {
-  border-radius: 0 99em 99em 0;
-}
-
-.arrow-btn:active {
-  background: #f6f5f4;
-  box-shadow: inset -20px 20px 60px #d1d0cf,
-              inset 20px -20px 60px #ffffff;
-}
-
-.arrow-btn--horizontal {
-  padding-bottom: 0.2em;
 }
 
 .cut-btn {
   margin-left: auto;
   margin-right: 0;
-  border-radius: 99rem 0 0 99rem;
   z-index: 1;
 }
 
 .clipboard-btn {
-  margin-left: 0;
-  border-radius: 0 99em 99em 0;
 }
 
 .toolbar button:disabled {
