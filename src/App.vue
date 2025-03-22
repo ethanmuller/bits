@@ -337,10 +337,9 @@ function windowReturn() {
   flex-direction: row;
   justify-content: stretch;
   align-items: space-between;
-  min-height: 5em;
   margin-top: 0.25rem;
   gap: 0.5rem;
-  padding: 0 0.5rem;
+  padding: 0 0.5rem 0.5rem;
 }
 
 .navigator {
