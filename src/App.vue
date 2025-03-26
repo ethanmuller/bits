@@ -231,7 +231,7 @@ function windowReturn() {
     <div class="status-bar" v-else>
       <div><span class="indicator warning"></span> Connecting...</div>
     </div>
-    <div :style="{ opacity: store.socket.connected ? 1 : 0.5, transition: 'all 1s ease-out'}">
+    <div :style="{ opacity: store.socket.connected ? 1 : 0.25, transition: 'all 500ms ease-out'}">
       <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
       <div class="toolbar">
 
