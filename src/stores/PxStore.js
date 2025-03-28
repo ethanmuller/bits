@@ -1,5 +1,6 @@
 import { sfx } from '../Sfx.js'
-import { defineStore } from "pinia";
+import { defineStore } from "pinia"
+import { watch } from 'vue'
 import { io } from 'socket.io-client'
 import { viewWidth, viewHeight, imageWidth, imageHeight } from '../dimensions'
 
@@ -66,6 +67,9 @@ export const usePxStore = defineStore('main', {
       }
     }
   },
+  persist: {
+    pick: ['clipboard'],
+  },
   getters: {
   },
   actions: {
@@ -128,3 +132,5 @@ export const usePxStore = defineStore('main', {
     },
   },
 })
+
+
