@@ -47,6 +47,20 @@ onMounted(() => {
 
   window.addEventListener('focus', windowReturn);
   window.addEventListener('blur', windowLeave);
+  window.addEventListener('keydown', (event) => {
+   if (event.key === 'w' || event.key === 'ArrowUp') {
+    store.setPan(store.pan[0], store.pan[1] - 1)
+   }
+   if (event.key === 'a' || event.key === 'ArrowLeft') {
+    store.setPan(store.pan[0] - 1, store.pan[1])
+   }
+   if (event.key === 's' || event.key === 'ArrowDown') {
+    store.setPan(store.pan[0], store.pan[1] + 1)
+   }
+   if (event.key === 'd' || event.key === 'ArrowRight') {
+    store.setPan(store.pan[0] + 1, store.pan[1])
+   }
+  });
 })
 
 onUnmounted(() => {
@@ -214,7 +228,7 @@ function windowReturn() {
   store.socket.emit('join', (data) => {
     store.px = data.px
     updateCanvas()
-    clientsList.value = list
+    clientsList.value = data.list
   })
 }
 
@@ -224,7 +238,7 @@ function windowReturn() {
 
 <template>
   <div class="wrapper">
-    <div class="status-bar" v-if="store.socket.connected">
+    <div class="status-bar" v-if="store.socket.connected && clientsList && clientsList.length">
       <div><span class="indicator positive"></span> Connected</div>
       <div>Users online: {{clientsList.length}}</div>
     </div>
