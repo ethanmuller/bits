@@ -40,14 +40,7 @@ const state = reactive({
   ctx: null,
 })
 
-onMounted(() => {
-  state.ctx = clipboardCanvas.value.getContext('2d')
-
-  updateCanvas()
-
-  window.addEventListener('focus', windowReturn);
-  window.addEventListener('blur', windowLeave);
-  window.addEventListener('keydown', (event) => {
+function handleKeyDown(event) {
    if (event.key === 'w' || event.key === 'ArrowUp') {
     store.setPan(store.pan[0], store.pan[1] - 1)
    }
@@ -60,12 +53,22 @@ onMounted(() => {
    if (event.key === 'd' || event.key === 'ArrowRight') {
     store.setPan(store.pan[0] + 1, store.pan[1])
    }
-  });
+}
+
+onMounted(() => {
+  state.ctx = clipboardCanvas.value.getContext('2d')
+
+  updateCanvas()
+
+  window.addEventListener('focus', windowReturn);
+  window.addEventListener('blur', windowLeave);
+  window.addEventListener('keydown', handleKeyDown);
 })
 
 onUnmounted(() => {
   window.removeEventListener('focus', windowReturn);
   window.removeEventListener('blur', windowLeave);
+  window.removeEventListener('keydown', handleKeyDown);
 })
 
 function updateCanvas() {
@@ -223,12 +226,12 @@ function windowLeave() {
 }
 
 function windowReturn() {
-  console.log('refreshing data')
-
+  console.log('asking server for new data')
   store.socket.emit('join', (data) => {
+    console.log(data)
     store.px = data.px
     updateCanvas()
-    clientsList.value = data.list
+    clientsList.value = data.clientsList
   })
 }
 
