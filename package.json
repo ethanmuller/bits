@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "discord.js": "^14.18.0",
     "express": "^4.17.3",
     "pinia": "^2.0.13",
     "pinia-plugin-persistedstate": "^4.2.0",
@@ -19,6 +20,7 @@
     "vue": "^3.2.25"
   },
   "devDependencies": {
+    "dotenv": "^16.4.7",
     "nodemon": "^2.0.15",
     "vite-plugin-qrcode": "^0.2.4"
   }

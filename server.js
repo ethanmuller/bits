@@ -3,6 +3,7 @@ const socket = require("socket.io");
 const path = require('path')
 const express = require('express')
 const { createServer: createViteServer } = require('vite')
+const { sendMessage } = require('./discordBot')
 
 const w = 89
 const h = 89
@@ -41,6 +42,7 @@ function pget(x, y) {
   return px[y][x]
 }
 
+
 async function createServer() {
   const app = express()
 
@@ -71,6 +73,7 @@ async function createServer() {
     const clientsList = Array.from(io.sockets.sockets.keys());
     io.emit('player list', clientsList)
     console.log(`join ${socket.id} @ ${new Date().toLocaleString()}`);
+    sendMessage(`${clientsList.length} user(s) connected: https://ethanmuller.com/bitter`)
 
     socket.on("join", function (cb) {
       const clientsList = Array.from(io.sockets.sockets.keys());
