@@ -1,8 +1,8 @@
 import { sfx } from '../Sfx.js'
 import { defineStore } from "pinia"
-import { watch } from 'vue'
 import { io } from 'socket.io-client'
 import { viewWidth, viewHeight, imageWidth, imageHeight } from '../dimensions'
+import { useRoute } from 'vue-router';
 
 
 function createEmptyGrid(width, height) {
@@ -29,6 +29,9 @@ export const usePxStore = defineStore('main', {
         transports: ['websocket'],
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
+        auth: {
+          // room: route.path,
+        },
       }),
       pan: [0,0],
       i: 0,
@@ -73,6 +76,9 @@ export const usePxStore = defineStore('main', {
   getters: {
   },
   actions: {
+    disconnectSocket() {
+      this.socket.disconnect();
+    },
     pget(x, y) {
       if (this.px[y]) {
         return this.px[y + this.pan[1]*9][x + this.pan[0]*9]

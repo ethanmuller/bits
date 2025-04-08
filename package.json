@@ -17,7 +17,8 @@
     "socket.io-client": "^4.4.1",
     "tone": "^14.7.77",
     "vite": "^6.2.0",
-    "vue": "^3.2.25"
+    "vue": "^3.2.25",
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "dotenv": "^16.4.7",

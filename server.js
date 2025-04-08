@@ -70,9 +70,10 @@ async function createServer() {
   
 
   io.on("connection", function (socket) {
+    const room = socket.handshake.auth.room;
     const clientsList = Array.from(io.sockets.sockets.keys());
     io.emit('player list', clientsList)
-    console.log(`join ${socket.id} @ ${new Date().toLocaleString()}`);
+    console.log(`${room} - join ${socket.id} @ ${new Date().toLocaleString()}`);
     sendMessage(`${clientsList.length} user(s) connected: https://ethanmuller.com/bitter`)
 
     socket.on("join", function (cb) {
