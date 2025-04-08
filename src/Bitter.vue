@@ -55,10 +55,15 @@ function handleKeyDown(event) {
    }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await store.initializeSocket();
+
   state.ctx = clipboardCanvas.value.getContext('2d')
 
+  setupSocketEvents();
+
   updateCanvas()
+
 
   window.addEventListener('focus', windowReturn);
   window.addEventListener('blur', windowLeave);
@@ -206,23 +211,25 @@ function clearAll() {
   }
 }
 
-store.socket.on('sfx', (sfk) => {
-  sfx[sfk]()
-})
+function setupSocketEvents() {
+  store.socket.on('sfx', (sfk) => {
+    sfx[sfk]()
+  })
 
-store.socket.on('theme changed', (themeName) => {
-  store.changeTheme(themeName)
+  store.socket.on('theme changed', (themeName) => {
+    store.changeTheme(themeName)
 
-  try {
-    themeSynth.triggerAttackRelease(750, "64n");
-  } catch(e) {
-  }
-})
+    try {
+      themeSynth.triggerAttackRelease(750, "64n");
+    } catch(e) {
+    }
+  })
 
-store.socket.on('player list', (list) => {
-  //clientsList.value = list.filter((i) => i !== store.socket.id)
-  clientsList.value = list
-})
+  store.socket.on('player list', (list) => {
+    //clientsList.value = list.filter((i) => i !== store.socket.id)
+    clientsList.value = list
+  })
+}
 
 function windowLeave() {
 }
@@ -243,14 +250,14 @@ function windowReturn() {
 
 <template>
   <div class="wrapper">
-    <div class="status-bar" v-if="store.socket.connected && clientsList && clientsList.length">
+    <div class="status-bar" v-if="store.socket && store.socket.connected && clientsList && clientsList.length">
       <div><span class="indicator positive"></span> Connected</div>
       <div>Users online: {{clientsList.length}}</div>
     </div>
     <div class="status-bar" v-else>
       <div><span class="indicator warning"></span> Connecting...</div>
     </div>
-    <div :style="{ opacity: store.socket.connected ? 1 : 0.25, transition: 'all 500ms ease-out'}">
+    <div :style="{ opacity: store.socket && store.socket.connected ? 1 : 0.25, transition: 'all 500ms ease-out'}">
       <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
       <div class="toolbar">
 

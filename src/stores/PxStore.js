@@ -24,15 +24,7 @@ export const usePxStore = defineStore('main', {
     return {
       px: createEmptyGrid(imageWidth, imageHeight),
       clipboard: createEmptyGrid(viewWidth, viewHeight),
-      socket: io(window.location.origin, {
-        path: '/bitter/socket/',
-        transports: ['websocket'],
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        auth: {
-          // room: route.path,
-        },
-      }),
+      socket: null,
       pan: [0,0],
       i: 0,
       currentTheme: 'electric',
@@ -76,6 +68,17 @@ export const usePxStore = defineStore('main', {
   getters: {
   },
   actions: {
+    initializeSocket() {
+      this.socket = io(window.location.origin, {
+        path: '/bitter/socket/',
+        transports: ['websocket'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        auth: {
+          // room: route.path,
+        },
+      });
+    },
     disconnectSocket() {
       this.socket.disconnect();
     },

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, watch } from 'vue'
 import * as Tone from 'tone'
 import { usePxStore } from '../stores/PxStore.js'
 import { sfx } from '../Sfx.js'
@@ -38,37 +38,40 @@ const state = reactive({
   isAudioSetup: false,
 })
 
-store.socket.on('updateAll', (px) => {
-  store.px = px
-  updateCanvas()
+function setupSocketEvents() {
+  if (!store.socket) return;
+  store.socket.on('updateAll', (px) => {
+    store.px = px
+    updateCanvas()
 
-  try {
-    //synth2.triggerAttackRelease(500, "64n");
-  } catch(e) {
-  }
-})
-store.socket.on('updatePx', (x,y,pan,c) => {
-  sfx.bit(x, y, c)
-  //playSound(x,y)
+    try {
+      //synth2.triggerAttackRelease(500, "64n");
+    } catch(e) {
+    }
+  })
+  store.socket.on('updatePx', (x,y,pan,c) => {
+    sfx.bit(x, y, c)
+    //playSound(x,y)
 
-  try {
-    //synth3.triggerAttackRelease(500, "64n");
-  } catch(e) {
-  }
-  store.pset(x+pan[0]*viewWidth, y+pan[1]*viewHeight, c)
-  updateCanvas()
-})
+    try {
+      //synth3.triggerAttackRelease(500, "64n");
+    } catch(e) {
+    }
+    store.pset(x+pan[0]*viewWidth, y+pan[1]*viewHeight, c)
+    updateCanvas()
+  })
 
-store.socket.on('updateChunk', (panX, panY, chunkPx) => {
-  store.chunkSet(panX, panY, chunkPx)
-  updateCanvas()
-})
+  store.socket.on('updateChunk', (panX, panY, chunkPx) => {
+    store.chunkSet(panX, panY, chunkPx)
+    updateCanvas()
+  })
 
-store.socket.emit('join', (data) => {
-  store.px = data.px
-  store.currentTheme = data.currentTheme
-  updateCanvas()
-})
+  store.socket.emit('join', (data) => {
+    store.px = data.px
+    store.currentTheme = data.currentTheme
+    updateCanvas()
+  })
+}
 
 function setupAudio(e) {
 
@@ -253,9 +256,18 @@ onMounted(() => {
   state.ctx = pad.value.getContext('2d')
 
   updateCanvas()
+  if (store.socket) {
+    setupSocketEvents();
+  }
   
   // Add global mouseup listener
   window.addEventListener('mouseup', mouseUp)
+})
+
+watch(() => store.socket, (newSocket) => {
+  if (newSocket) {
+    setupSocketEvents();
+  }
 })
 
 function updateCanvas() {
