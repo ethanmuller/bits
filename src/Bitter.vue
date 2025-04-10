@@ -10,7 +10,14 @@ import { useRoute } from 'vue-router';
 import { rooms as roomData } from './rooms';
 
 const route = useRoute();
-const theme = roomData[route.path].theme
+
+const getLastSegment = () => {
+  const path = route.path;
+  const segments = path.split('/');
+  return segments.pop();
+};
+
+const theme = roomData[getLastSegment()].theme
 
 const store = usePxStore()
 

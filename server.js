@@ -7,10 +7,10 @@ import { rooms as roomData } from './src/rooms.js'
 const w = 89
 const h = 89
 let rooms = {
-  "/a": initialize_canvas(), 
-  "/b": initialize_canvas(), 
-  "/c": initialize_canvas(), 
-  "/d": initialize_canvas(), 
+  "a": initialize_canvas(), 
+  "b": initialize_canvas(), 
+  "c": initialize_canvas(), 
+  "d": initialize_canvas(), 
 };
 const PORT = 3333
 

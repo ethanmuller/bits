@@ -1,6 +1,6 @@
 
 export const rooms = {
-  '/a': {
+  'a': {
     name: 'Multiplayer Room A',
     theme: {
       fg: '#f00',
@@ -8,7 +8,7 @@ export const rooms = {
       hl: '#ffcccc',
     }
   },
-  '/b': {
+  'b': {
     name: 'Multiplayer Room B',
     theme: {
       fg: '#000',
@@ -16,7 +16,7 @@ export const rooms = {
       hl: '#ffcc00',
     }
   },
-  '/c': {
+  'c': {
     name: 'Multiplayer Room C',
     theme: {
       fg: '#030',
@@ -24,7 +24,7 @@ export const rooms = {
       hl: '#ccddcc',
     }
   },
-  '/d': {
+  'd': {
     name: 'Multiplayer Room D',
     theme: {
       fg: '#30a',

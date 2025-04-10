@@ -4,6 +4,10 @@ import { io } from 'socket.io-client'
 import { viewWidth, viewHeight, imageWidth, imageHeight } from '../dimensions'
 import { useRoute } from 'vue-router';
 
+const getLastSegment = (path) => {
+  const segments = path.split('/');
+  return segments.pop();
+};
 
 function createEmptyGrid(width, height) {
   const grid = new Array(height)
@@ -23,13 +27,14 @@ export const usePxStore = defineStore('main', {
   state() {
     const route = useRoute();
 
+
     return {
       px: createEmptyGrid(imageWidth, imageHeight),
       clipboard: createEmptyGrid(viewWidth, viewHeight),
       socket: null,
       pan: [0,0],
       i: 0,
-      room: route.path,
+      room: getLastSegment(route.path),
     }
   },
   persist: {
@@ -46,7 +51,7 @@ export const usePxStore = defineStore('main', {
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
         auth: {
-          room: route.path,
+          room: getLastSegment(route.path),
         },
       });
     },
