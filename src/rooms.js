@@ -3,17 +3,17 @@ export const rooms = {
   '/a': {
     name: 'Multiplayer Room A',
     theme: {
-      fg: '#000',
-      bg: '#fff',
-      hl: '#ffcc00',
+      fg: '#f00',
+      bg: '#ffffff',
+      hl: '#ffcccc',
     }
   },
   '/b': {
     name: 'Multiplayer Room B',
     theme: {
-      fg: '#f00',
-      bg: '#ffffff',
-      hl: '#ffcccc',
+      fg: '#000',
+      bg: '#fff',
+      hl: '#ffcc00',
     }
   },
   '/c': {

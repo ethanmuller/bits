@@ -9,36 +9,8 @@ import { viewWidth, viewHeight, imageWidth, imageHeight } from './dimensions'
 import { useRoute } from 'vue-router';
 import { rooms as roomData } from './rooms';
 
-const themes = {
-  '/a': {
-    fg: '#000',
-    bg: '#fff',
-    hl: '#ffcc00',
-  },
-  '/b': {
-    fg: '#f00',
-    bg: '#ffffff',
-    hl: '#ffcccc',
-  },
-  '/c': {
-    fg: '#030',
-    bg: '#ffffff',
-    hl: '#ccddcc',
-  },
-  '/d': {
-    fg: '#30a',
-    bg: '#fff',
-    hl: '#fcf',
-  },
-  '/local': {
-    fg: '#000',
-    bg: '#fff',
-    hl: '#ffcc00',
-  },
-}
-
 const route = useRoute();
-const currentTheme = route.path;
+const theme = roomData[route.path].theme
 
 const store = usePxStore()
 
@@ -113,7 +85,7 @@ onUnmounted(() => {
 
 function updateCanvas() {
   if (state && state.ctx) {
-    const pxColor = themes[currentTheme].fg
+    const pxColor = theme.fg
 
     state.ctx.fillStyle = pxColor
     state.ctx.clearRect(0, 0, 9, 9)
@@ -267,7 +239,6 @@ function windowLeave() {
 }
 
 function windowReturn() {
-  console.log('asking server for new data')
   store.socket.emit('join', (data) => {
     store.px = data.px
     updateCanvas()
@@ -289,7 +260,7 @@ function windowReturn() {
       <div><span class="indicator warning"></span> Connecting...</div>
     </div>
     <div :style="{ opacity: store.socket && store.socket.connected ? 1 : 0.25, transition: 'all 500ms ease-out'}">
-      <Spreditor tone="Tone" :theme="themes[currentTheme]" width="9" height="9" />
+      <Spreditor tone="Tone" :theme="theme" width="9" height="9" />
       <div class="toolbar">
 
         <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
@@ -297,7 +268,7 @@ function windowReturn() {
         <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></span></button>
         <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getViewedChunk())"><span class="neo-btn__inner">✂️</span></button>
         <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
-          <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: themes[currentTheme].hl }" class="neo-btn__inner"></canvas>
+          <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: theme.hl }" class="neo-btn__inner"></canvas>
         </button>
       </div>
       <div class="navigator">
@@ -307,7 +278,7 @@ function windowReturn() {
           <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="ass(0, -1)"><span class="neo-btn__inner">↑</span></button>
           <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="ass(1, 0)"><span class="neo-btn__inner">→</span></button>
         </div>
-        <Spravigator :theme="themes[currentTheme]"/>
+        <Spravigator :theme="theme"/>
       </div>
     </div>
   </div>
@@ -319,59 +290,6 @@ function windowReturn() {
 .wrapper {
   max-width: 480px;
   margin: 0 auto;
-}
-
-.palettes {
-  display: flex;
-
-  flex-wrap: wrap;
-  width: 100%;
-  justify-content: center;
-
-  margin-top: 0.5em;
-}
-.palettes button {
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-  display: flex;
-  background: transparent;
-  border: none;
-  color: inherit;
-  font: inherit;
-  padding: 0;
-
-  width: 3rem;
-  height: 3rem;
-
-  margin: 0.5em;
-}
-
-.palettes button.selected {
-}
-
-.palettes span {
-  display: inline-block;
-  width: 1.5rem;
-  height: 1.5rem;
-  transition: all 100ms;
-  transform-origin: 50% 50%;
-}
-
-.palettes span:nth-child(1) {
-  z-index: 1;
-}
-
-.palettes span:nth-child(2) {
-  transform: translate3d(0, 100%, 0);
-}
-
-.palettes .selected span:nth-child(1) {
-  transform: translate3d(50%, 50%, 0);
-}
-
-.palettes .selected span:nth-child(2) {
-  transform: translate3d(-50%, 50%, 0) scale(2);
-}
-.clear-btn {
 }
 
 .toolbar {
@@ -495,9 +413,6 @@ function windowReturn() {
   margin-left: auto;
   margin-right: 0;
   z-index: 1;
-}
-
-.clipboard-btn {
 }
 
 .toolbar button:disabled {

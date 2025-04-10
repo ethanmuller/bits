@@ -10,12 +10,10 @@
   onMounted(async () => {
     await store.initializeSocket();
     setupSocketEvents();
-    console.log('hello')
   })
 
   onUnmounted(() => {
     store.disconnectSocket()
-    console.log('goodbye')
   })
 
   function setupSocketEvents() {
@@ -28,14 +26,12 @@
 <template>
   <div class="wrapper">
     <nav>
-      <!--<div><RouterLink to="/local">Local Room</RouterLink></div>
-      <div><RouterLink to="/a"><span>Multiplayer Room A</span> <span class="info">👤</span></RouterLink></div>
-      <div><RouterLink to="/b"><span>Multiplayer Room B</span> <span class="info">👤</span></RouterLink></div>
-      <div><RouterLink to="/c"><span>Multiplayer Room C</span> <span class="info">👤</span></RouterLink></div>
-      <div><RouterLink to="/d"><span>Multiplayer Room D</span> <span class="info">👤</span></RouterLink></div>
--->
       <div v-for="room in Object.entries(roomData)">
         <RouterLink :to="room[0]">
+          <div class="swatch" :style="{ background: room[1].theme.bg }">
+            <span :style="{ background: room[1].theme.fg }"></span>
+            <span :style="{ background: room[1].theme.hl }"></span>
+          </div>
           <span>{{room[1].name}}</span>
           <span class="info">👤 {{roomStatus[room[0]]}}</span>
         </RouterLink>
@@ -56,8 +52,10 @@ nav {
 }
 
 nav a {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1em;
+  align-items: center;
   padding: 2rem 2rem;
   margin: 3rem;
   background: #eee;
@@ -85,5 +83,46 @@ nav a:active {
   transition-duration: 0s;
   background: #eaeaea;
   box-shadow: 0 0 #ffffffc2, 0 0 #ffffffb3, 0 0 #00000012, 0 0 #00000007, 0 0 #0000000c, 0 0 #0000000d, 0 0 #0000000d, inset -1px 1px 3px #0000001a, inset 1px -1px 3px #fff3;
+}
+
+nav .info {
+  color: #777;
+}
+
+.swatch {
+  display: flex;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+
+  width: 2rem;
+  height: 2rem;
+
+  margin: 0.5em;
+}
+.swatch span {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  transition: all 100ms;
+  transform-origin: 50% 50%;
+}
+
+.swatch span:nth-child(1) {
+  z-index: 1;
+}
+
+.swatch span:nth-child(2) {
+  transform: translate3d(0, 100%, 0);
+}
+
+.swatch .selected span:nth-child(1) {
+  transform: translate3d(50%, 50%, 0);
+}
+
+.swatch .selected span:nth-child(2) {
+  transform: translate3d(-50%, 50%, 0) scale(2);
 }
 </style>
