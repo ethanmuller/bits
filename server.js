@@ -89,7 +89,10 @@ async function createServer() {
     io.emit('room status', roomStatus);
 
     console.log(`${room} - join ${socket.id} @ ${new Date().toLocaleString()}`);
-    sendMessage(`${roomClients.length} user(s) connected: https://ethanmuller.com/bitter`)
+
+    if (room) {
+      sendMessage(`${roomClients.length} user(s) connected: https://ethanmuller.com/bitter/#/${room}`)
+    }
 
     socket.on("join", function (cb) {
       const roomClients = Array.from(io.sockets.adapter.rooms.get(room) || []);
