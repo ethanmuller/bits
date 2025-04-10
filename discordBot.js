@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits, } from 'discord.js';
-import 'dotenv';
+import 'dotenv/config';
 let client;
 
 if (process.env.DISCORD) {
