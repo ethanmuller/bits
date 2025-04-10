@@ -21,45 +21,15 @@ function createEmptyGrid(width, height) {
 
 export const usePxStore = defineStore('main', {
   state() {
+    const route = useRoute();
+
     return {
       px: createEmptyGrid(imageWidth, imageHeight),
       clipboard: createEmptyGrid(viewWidth, viewHeight),
       socket: null,
       pan: [0,0],
       i: 0,
-      currentTheme: 'electric',
-      themes: {
-        electric: {
-          fg: '#000',
-          bg: '#fff',
-          hl: '#ffcc00',
-        },
-        cute: {
-          fg: '#ff8888',
-          bg: '#ffeeee',
-          hl: '#ffffff',
-        },
-        cloudy: {
-          fg: '#888',
-          bg: '#fff',
-          hl: '#ddd',
-        },
-        energy: {
-          fg: '#fff000',
-          bg: '#00f',
-          hl: '#33f',
-        },
-        santa: {
-          fg: '#fff',
-          bg: '#f00',
-          hl: '#f88',
-        },
-        cyber: {
-          fg: '#0f0',
-          bg: '#000',
-          hl: '#030',
-        },
-      }
+      room: route.path,
     }
   },
   persist: {
@@ -69,13 +39,14 @@ export const usePxStore = defineStore('main', {
   },
   actions: {
     initializeSocket() {
+      const route = useRoute();
       this.socket = io(window.location.origin, {
         path: '/bitter/socket/',
         transports: ['websocket'],
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
         auth: {
-          // room: route.path,
+          room: route.path,
         },
       });
     },

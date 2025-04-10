@@ -68,7 +68,6 @@ function setupSocketEvents() {
 
   store.socket.emit('join', (data) => {
     store.px = data.px
-    store.currentTheme = data.currentTheme
     updateCanvas()
   })
 }
@@ -272,7 +271,7 @@ watch(() => store.socket, (newSocket) => {
 
 function updateCanvas() {
   if (state && state.ctx) {
-    const pxColor = store.themes[store.currentTheme].fg
+    const pxColor = props.theme.fg
 
     state.ctx.clearRect(0, 0, props.width, props.width)
     state.ctx.fillStyle = pxColor
@@ -340,7 +339,7 @@ function mouseEnter(e) {
     v-on:touchstart.prevent="touchStart"
     v-on:touchmove.prevent="touchMove"
     v-on:touchend.prevent="touchEnd"
-    :style="{ background: store.themes[store.currentTheme].hl }"
+    :style="{ background: props.theme.hl }"
     ></canvas>
 </template>
 

@@ -104,8 +104,8 @@ function touchMove(e) {
 }
 
 function updateCanvas() {
-  const pxColor = store.themes[store.currentTheme].fg
-  const hlColor = store.themes[store.currentTheme].hl
+  const pxColor = props.theme.fg
+  const hlColor = props.theme.hl
 
   state.ctx.clearRect(0, 0, imageWidth, imageHeight)
   state.ctx.fillStyle = pxColor
@@ -136,7 +136,7 @@ function updateCanvas() {
     @mousemove="mouseMove"
     v-on:touchstart.prevent.disablePassive="touchStart"
     v-on:touchmove.prevent.disablePassive="touchMove"
-    :style="{ background: store.themes[store.currentTheme].bg }"></canvas>
+    :style="{ background: props.theme.bg }"></canvas>
 </template>
 
 <style>

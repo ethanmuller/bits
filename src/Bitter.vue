@@ -6,6 +6,39 @@ import { usePxStore } from './stores/PxStore.js'
 import { sfx } from './Sfx.js'
 import * as Tone from 'tone'
 import { viewWidth, viewHeight, imageWidth, imageHeight } from './dimensions'
+import { useRoute } from 'vue-router';
+import { rooms as roomData } from './rooms';
+
+const themes = {
+  '/a': {
+    fg: '#000',
+    bg: '#fff',
+    hl: '#ffcc00',
+  },
+  '/b': {
+    fg: '#f00',
+    bg: '#ffffff',
+    hl: '#ffcccc',
+  },
+  '/c': {
+    fg: '#030',
+    bg: '#ffffff',
+    hl: '#ccddcc',
+  },
+  '/d': {
+    fg: '#30a',
+    bg: '#fff',
+    hl: '#fcf',
+  },
+  '/local': {
+    fg: '#000',
+    bg: '#fff',
+    hl: '#ffcc00',
+  },
+}
+
+const route = useRoute();
+const currentTheme = route.path;
 
 const store = usePxStore()
 
@@ -80,7 +113,7 @@ onUnmounted(() => {
 
 function updateCanvas() {
   if (state && state.ctx) {
-    const pxColor = store.themes[store.currentTheme].fg
+    const pxColor = themes[currentTheme].fg
 
     state.ctx.fillStyle = pxColor
     state.ctx.clearRect(0, 0, 9, 9)
@@ -196,7 +229,6 @@ function paste() {
 
 function triggerThemeChange(ev, themeName) {
   store.changeTheme(themeName)
-  store.socket.emit('change theme', themeName)
 
   try {
     themeSynth.triggerAttackRelease(750, "64n");
@@ -237,7 +269,6 @@ function windowLeave() {
 function windowReturn() {
   console.log('asking server for new data')
   store.socket.emit('join', (data) => {
-    console.log(data)
     store.px = data.px
     updateCanvas()
     clientsList.value = data.clientsList
@@ -249,7 +280,7 @@ function windowReturn() {
 
 
 <template>
-  <div class="wrapper">
+  <div class="wrapper" style="--editor-bg: red;">
     <div class="status-bar" v-if="store.socket && store.socket.connected && clientsList && clientsList.length">
       <div><span class="indicator positive"></span> Connected</div>
       <div>Users online: {{clientsList.length}}</div>
@@ -258,7 +289,7 @@ function windowReturn() {
       <div><span class="indicator warning"></span> Connecting...</div>
     </div>
     <div :style="{ opacity: store.socket && store.socket.connected ? 1 : 0.25, transition: 'all 500ms ease-out'}">
-      <Spreditor tone="Tone" :theme="store.themes[store.currentTheme]" width="9" height="9" />
+      <Spreditor tone="Tone" :theme="themes[currentTheme]" width="9" height="9" />
       <div class="toolbar">
 
         <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
@@ -266,7 +297,7 @@ function windowReturn() {
         <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></span></button>
         <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getViewedChunk())"><span class="neo-btn__inner">✂️</span></button>
         <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
-          <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: store.themes[store.currentTheme].hl }" class="neo-btn__inner"></canvas>
+          <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: themes[currentTheme].hl }" class="neo-btn__inner"></canvas>
         </button>
       </div>
       <div class="navigator">
@@ -276,17 +307,8 @@ function windowReturn() {
           <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="ass(0, -1)"><span class="neo-btn__inner">↑</span></button>
           <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="ass(1, 0)"><span class="neo-btn__inner">→</span></button>
         </div>
-        <Spravigator />
+        <Spravigator :theme="themes[currentTheme]"/>
       </div>
-    </div>
-  </div>
-
-  <div class="palettes" :style="{ color: store.themes[store.currentTheme].fg }">
-    <div v-for="theme, themeName in store.themes">
-      <button @click="(e) => triggerThemeChange(e, themeName)" :style="{ background: theme.bg }" :class="{ selected: themeName === store.currentTheme }">
-        <span :style="{ background: theme.fg }"></span>
-        <span :style="{ background: theme.hl }"></span>
-      </button>
     </div>
   </div>
 
@@ -301,7 +323,6 @@ function windowReturn() {
 
 .palettes {
   display: flex;
-  display: none;
 
   flex-wrap: wrap;
   width: 100%;
@@ -421,6 +442,19 @@ function windowReturn() {
   align-items: center;
   justify-content: center;
 }
+.neo-btn:hover {
+  transition-duration: 0.3s;
+  background: #f3f3f3;
+  box-shadow: 4px -4px 8px #ffffffc2,
+    1.04px -1.04px 2.62px #ffffffb3,
+    -7px 7px 20px #00000012,
+    -10.57px 10.5662px 7px #00000007,
+    -3.63px 3.6347px 2.0172px #0000000c,
+    -1.04px 1.03796px 1.62304px #0000000d,
+    -0.2px 0.2px 1px #0000000d,
+    inset -1px 1px 3px #0000,
+    inset 1px -1px 3px #fff0;
+}
 .neo-btn:active {
   transition-duration: 0s;
   background: #eaeaea;
@@ -455,7 +489,6 @@ function windowReturn() {
   width: 100%;
   height: 100%;
 
-  background: #f6f5f4;
 }
 
 .cut-btn {

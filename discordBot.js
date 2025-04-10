@@ -1,5 +1,5 @@
-const { Client, GatewayIntentBits, } = require('discord.js');
-require('dotenv').config()
+import { Client, GatewayIntentBits, } from 'discord.js';
+import 'dotenv';
 let client;
 
 if (process.env.DISCORD) {
@@ -14,7 +14,7 @@ if (process.env.DISCORD) {
   });
 }
 
-function sendMessage(msg) {
+export function sendMessage(msg) {
 
   if (!process.env.DISCORD) {
     return
@@ -26,9 +26,5 @@ function sendMessage(msg) {
   } else {
     console.log('Could not find the specified channel');
   }
-}
-
-module.exports = {
-  sendMessage,
 }
 

@@ -2,6 +2,7 @@
   "name": "bitter",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "nodemon server.js",
     "build": "vite build",

@@ -4,16 +4,21 @@ import { createPinia } from "pinia"
 import piniaPluginPersistedState from 'pinia-plugin-persistedstate'
 import { createWebHistory, createRouter } from 'vue-router'
 
-import HomeView from './HomeView.vue'
+import RoomList from './RoomList.vue'
 import Bitter from './Bitter.vue'
 
 const routes = [
-    { path: '/', component: HomeView, meta: { title: "Bitter · Room Select" } },
-    { path: '/local', component: Bitter, meta: { title: "Bitter" }  },
+    { path: '/', component: RoomList, meta: { title: "Bitter · Room Select" } },
+    // { path: '/local', component: Bitter, meta: { title: "Bitter" }  },
     { path: '/a', component: Bitter, meta: { title: "Bitter · Room A" }  },
     { path: '/b', component: Bitter, meta: { title: "Bitter · Room B" }  },
     { path: '/c', component: Bitter, meta: { title: "Bitter · Room C" }  },
     { path: '/d', component: Bitter, meta: { title: "Bitter · Room D" }  },
+    {
+      // Catch all unmatched routes
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
+    },
 ]
 
 const router = createRouter({
@@ -23,7 +28,7 @@ const router = createRouter({
 
 // router/index.js or main.js depending on where you set up the router
 router.beforeEach((to, from, next) => {
-  const defaultTitle = 'My App'; // fallback title
+  const defaultTitle = 'Bitter'; // fallback title
   document.title = to.meta.title || defaultTitle;
   next();
 });
