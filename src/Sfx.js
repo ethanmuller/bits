@@ -22,7 +22,7 @@ const navSynth = new Tone.Synth({
   },
   envelope: {
     attack: 0.001,
-    decay: 0.02,
+    decay: 0.005,
     sustain: 0,
     release: 0,
   },
@@ -72,9 +72,16 @@ export const sfx = {
     } catch(e) {
     }
   },
-  nav() {
-    navSynth.triggerAttackRelease(300, "32n");
-    navSynth.frequency.rampTo(100, 0.02)
+  nav(opts) {
+    if (opts && opts.short) {
+      navSynth.envelope.decay = 0.01
+      navSynth.triggerAttackRelease(1600, "32n");
+      navSynth.frequency.rampTo(1300, 0.01)
+    } else {
+      navSynth.envelope.decay = 0.02
+      navSynth.triggerAttackRelease(300, "32n");
+      navSynth.frequency.rampTo(100, 0.02)
+    }
   },
   bwip() {
     clipboardSynth.triggerAttackRelease("C3", "32n");

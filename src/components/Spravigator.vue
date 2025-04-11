@@ -99,6 +99,11 @@ function touchMove(e) {
     y = Math.floor(ty/rect.height*imageHeight) - Math.floor(viewHeight/2)
   }
 
+  x = Math.max(x, 0)
+  x = Math.min(x, imageWidth)
+  y = Math.max(y, 0)
+  y = Math.min(y, imageHeight)
+
   if (x !== state.lastX || y !== state.lastY) {
     store.setPan(x,y)
   }

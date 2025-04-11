@@ -85,7 +85,7 @@ export const usePxStore = defineStore('main', {
       this.pan[0] = x
       this.pan[1] = y
 
-      sfx.nav()
+      sfx.nav({ short: !this.panJump })
     },
     changeTheme(t) {
       this.currentTheme = t
