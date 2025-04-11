@@ -54,16 +54,16 @@ const state = reactive({
 
 function handleKeyDown(event) {
    if (event.key === 'w' || event.key === 'ArrowUp') {
-    store.setPan(store.pan[0], store.pan[1] - 1)
+    shiftPan(0, -1)
    }
    if (event.key === 'a' || event.key === 'ArrowLeft') {
-    store.setPan(store.pan[0] - 1, store.pan[1])
+    shiftPan(-1, 0)
    }
    if (event.key === 's' || event.key === 'ArrowDown') {
-    store.setPan(store.pan[0], store.pan[1] + 1)
+    shiftPan(0, 1)
    }
    if (event.key === 'd' || event.key === 'ArrowRight') {
-    store.setPan(store.pan[0] + 1, store.pan[1])
+    shiftPan(1, 0)
    }
 }
 
@@ -110,13 +110,13 @@ function updateCanvas() {
 
 function clear() {
   store.clearView()
-  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, f)
+  store.socket.emit('chunkSet', store.pan[0], store.pan[1], f)
 }
 
 function copy() {
   for (let y = 0; y < store.clipboard.length; y++) {
     for (let x = 0; x < store.clipboard.length; x++) {
-      store.clipboard[y][x] = store.px[y + store.pan[1]*9][x + store.pan[0]*9]
+      store.clipboard[y][x] = store.px[y + store.pan[1]][x + store.pan[0]]
     }
   }
 }
@@ -148,8 +148,8 @@ function invert() {
     }
   }
 
-  store.chunkSet(store.pan[0]*9, store.pan[1]*9, chunk)
-  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, chunk)
+  store.chunkSet(store.pan[0], store.pan[1], chunk)
+  store.socket.emit('chunkSet', store.pan[0], store.pan[1], chunk)
 
   store.i = (store.i + 1) % 2
   sfx.bwip()
@@ -157,10 +157,10 @@ function invert() {
 }
 
 function getViewedChunk() {
-  const chunk = store.px.slice(store.pan[1]*9, store.pan[1]*9+9)
+  const chunk = store.px.slice(store.pan[1], store.pan[1]+9)
 
   for (let y = 0; y < 9; y++) {
-    chunk[y] = chunk[y].slice(store.pan[0]*9, store.pan[0]*9+9)
+    chunk[y] = chunk[y].slice(store.pan[0], store.pan[0]+9)
   }
 
   return chunk
@@ -172,8 +172,15 @@ function cut() {
   store.socket.emit('sfx', 'down')
 }
 
-function ass(x,y) {
-  store.setPan(store.pan[0] + x, store.pan[1] + y)
+function shiftPan(x,y) {
+  if (store.panJump) {
+    store.setPan(
+      Math.round((store.pan[0] + x*viewWidth)/viewWidth)*viewWidth,
+      Math.round((store.pan[1] + y*viewHeight)/viewHeight)*viewHeight
+    )
+  } else {
+    store.setPan(store.pan[0] + x, store.pan[1] + y)
+  }
 }
 
 function randomize() {
@@ -191,16 +198,16 @@ function randomize() {
     }
   }
 
-  store.chunkSet(store.pan[0]*9, store.pan[1]*9, chunk)
-  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, chunk)
+  store.chunkSet(store.pan[0], store.pan[1], chunk)
+  store.socket.emit('chunkSet', store.pan[0], store.pan[1], chunk)
 
   sfx.csh()
   store.socket.emit('sfx', 'csh')
 }
 
 function paste() {
-  store.chunkSet(store.pan[0]*9, store.pan[1]*9, store.clipboard)
-  store.socket.emit('chunkSet', store.pan[0]*9, store.pan[1]*9, store.clipboard)
+  store.chunkSet(store.pan[0], store.pan[1], store.clipboard)
+  store.socket.emit('chunkSet', store.pan[0], store.pan[1], store.clipboard)
 
   sfx.up()
   store.socket.emit('sfx', 'up')
@@ -280,10 +287,14 @@ function windowReturn() {
       </div>
       <div class="navigator">
         <div class="arrows">
-          <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="ass(-1, 0)"><span class="neo-btn__inner">←</span></button>
-          <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="ass(0, 1)"><span class="neo-btn__inner">↓</span></button>
-          <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="ass(0, -1)"><span class="neo-btn__inner">↑</span></button>
-          <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="ass(1, 0)"><span class="neo-btn__inner">→</span></button>
+          <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="shiftPan(-1, 0)"><span class="neo-btn__inner">←</span></button>
+          <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="shiftPan(0, 1)"><span class="neo-btn__inner">↓</span></button>
+          <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="shiftPan(0, -1)"><span class="neo-btn__inner">↑</span></button>
+          <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="shiftPan(1, 0)"><span class="neo-btn__inner">→</span></button>
+          <label class="tr jump-ctrl">
+            <input type="checkbox" v-model="store.panJump" />
+            🦘
+          </label>
         </div>
         <Spravigator :theme="theme"/>
       </div>
@@ -345,6 +356,13 @@ function windowReturn() {
 }
 .arrows .br {
   grid-area: br;
+}
+.arrows .tr {
+  grid-area: tr;
+}
+.jump-ctrl {
+  display: flex;
+  align-items: center;
 }
 
 .neo-btn {

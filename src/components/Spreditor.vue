@@ -57,7 +57,7 @@ function setupSocketEvents() {
       //synth3.triggerAttackRelease(500, "64n");
     } catch(e) {
     }
-    store.pset(x+pan[0]*viewWidth, y+pan[1]*viewHeight, c)
+    store.pset(x+pan[0], y+pan[1], c)
     updateCanvas()
   })
 
@@ -238,7 +238,7 @@ function draw(x,y) {
     
     if (currentValue !== state.c) {
         sfx.bit(x, y, state.c)
-        store.pset(x + store.pan[0]*viewWidth, y + store.pan[1]*viewHeight, state.c)
+        store.pset(x + store.pan[0], y + store.pan[1], state.c)
         store.socket.emit('pset', x, y, store.pan, state.c)
         updateCanvas()
     }

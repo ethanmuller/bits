@@ -76,10 +76,16 @@ async function createServer() {
 
   io.on("connection", function (socket) {
     const room = socket.handshake.auth.room;
-    socket.join(room);
 
-    const roomClients = Array.from(io.sockets.adapter.rooms.get(room) || []);
-    io.to(room).emit('player list', roomClients)
+    if (room) {
+      socket.join(room);
+      const roomClients = Array.from(io.sockets.adapter.rooms.get(room) || []);
+      io.to(room).emit('player list', roomClients)
+      console.log(`${room} - join ${socket.id} @ ${new Date().toLocaleString()}`);
+      sendMessage(`${roomClients.length} user(s) connected: https://ethanmuller.com/bitter/#/${room}`)
+    } else {
+      console.log('somebody joined the lobby');
+    }
 
     const roomStatus = {};
     Object.keys(rooms).forEach(r => {
@@ -88,11 +94,6 @@ async function createServer() {
     });
     io.emit('room status', roomStatus);
 
-    console.log(`${room} - join ${socket.id} @ ${new Date().toLocaleString()}`);
-
-    if (room) {
-      sendMessage(`${roomClients.length} user(s) connected: https://ethanmuller.com/bitter/#/${room}`)
-    }
 
     socket.on("join", function (cb) {
       const roomClients = Array.from(io.sockets.adapter.rooms.get(room) || []);
@@ -117,7 +118,7 @@ async function createServer() {
     });
 
     socket.on("pset", function (x,y, pan, c) {
-      bit_set(room, x+pan[0]*9, y+pan[1]*9, c)
+      bit_set(room, x+pan[0], y+pan[1], c)
       socket.broadcast.to(room).emit("updatePx", x,y,pan,c);
     });
     socket.on("chunkSet", function (panX, panY, chunkPx) {
@@ -129,9 +130,11 @@ async function createServer() {
       socket.broadcast.to(room).emit("sfx", sfk);
     })
     socket.on('disconnect', (reason) => {
-      console.log(`disconnect: ${socket.id} @ ${new Date().toLocaleString()}, reason: ${reason}`)
-      const roomClients = Array.from(io.sockets.adapter.rooms.get(room) || []);
-      socket.broadcast.to(room).emit('player list', roomClients)
+      if (room) {
+        console.log(`${room} - disconnect: ${socket.id} @ ${new Date().toLocaleString()}, reason: ${reason}`)
+        const roomClients = Array.from(io.sockets.adapter.rooms.get(room) || []);
+        socket.broadcast.to(room).emit('player list', roomClients)
+      }
 
       const roomStatus = {};
       Object.keys(rooms).forEach(r => {

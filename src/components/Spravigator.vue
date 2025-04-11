@@ -67,12 +67,14 @@ function touchStart(e) {
   var tx = e.changedTouches[0].clientX - rect.left;
   var ty = e.changedTouches[0].clientY - rect.top;
 
-  const x = Math.floor(tx/rect.width*(imageWidth/viewWidth))
-  const y = Math.floor(ty/rect.height*(imageHeight/viewHeight))
+  let x,y;
 
-  if (x < 0 || y < 0 ||
-    x >= (imageWidth/viewWidth) || y >= (imageHeight/viewHeight)) {
-    return
+  if (store.panJump) {
+    x = Math.floor(Math.floor(tx/rect.width*imageWidth) / viewWidth) * viewWidth
+    y = Math.floor(Math.floor(ty/rect.height*imageHeight) / viewHeight) * viewHeight
+  } else {
+    x = Math.floor(tx/rect.width*imageWidth) - Math.floor(viewWidth/2)
+    y = Math.floor(ty/rect.height*imageHeight) - Math.floor(viewHeight/2)
   }
 
   store.setPan(x,y)
@@ -87,12 +89,14 @@ function touchMove(e) {
   var tx = e.changedTouches[0].clientX - rect.left;
   var ty = e.changedTouches[0].clientY - rect.top;
 
-  const x = Math.floor(tx/rect.width*(imageWidth/viewWidth))
-  const y = Math.floor(ty/rect.height*(imageHeight/viewHeight))
+  let x,y;
 
-  if (x < 0 || y < 0 ||
-    x >= (imageWidth/viewWidth) || y >= (imageHeight/viewHeight)) {
-    return
+  if (store.panJump) {
+    x = Math.floor(Math.floor(tx/rect.width*imageWidth) / viewWidth) * viewWidth
+    y = Math.floor(Math.floor(ty/rect.height*imageHeight) / viewHeight) * viewHeight
+  } else {
+    x = Math.floor(tx/rect.width*imageWidth) - Math.floor(viewWidth/2)
+    y = Math.floor(ty/rect.height*imageHeight) - Math.floor(viewHeight/2)
   }
 
   if (x !== state.lastX || y !== state.lastY) {
@@ -121,7 +125,7 @@ function updateCanvas() {
 
   state.ctx.globalCompositeOperation = 'destination-over'
   state.ctx.fillStyle = hlColor
-  state.ctx.fillRect(store.pan[0]*viewWidth, store.pan[1]*viewHeight, viewWidth, viewHeight)
+  state.ctx.fillRect(store.pan[0], store.pan[1], viewWidth, viewHeight)
 }
 </script>
 

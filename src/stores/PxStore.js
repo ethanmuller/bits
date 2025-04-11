@@ -33,6 +33,7 @@ export const usePxStore = defineStore('main', {
       clipboard: createEmptyGrid(viewWidth, viewHeight),
       socket: null,
       pan: [0,0],
+      panJump: false,
       i: 0,
       room: getLastSegment(route.path),
     }
@@ -60,7 +61,7 @@ export const usePxStore = defineStore('main', {
     },
     pget(x, y) {
       if (this.px[y]) {
-        return this.px[y + this.pan[1]*9][x + this.pan[0]*9]
+        return this.px[y + this.pan[1]][x + this.pan[0]]
       } else {
         return 0
       }
@@ -76,16 +77,13 @@ export const usePxStore = defineStore('main', {
       }
     },
     setPan(x, y) {
-      if (x < 0) {
-        x = imageWidth/viewWidth-1
-      }
+      x = Math.max(x, 0)
+      x = Math.min(imageWidth-viewWidth, x)
+      y = Math.max(y, 0)
+      y = Math.min(imageHeight-viewHeight, y)
 
-      if (y < 0) {
-        y = imageHeight/viewHeight-1
-      }
-
-      this.pan[0] = x % (imageWidth/viewWidth)
-      this.pan[1] = y % (imageHeight/viewHeight)
+      this.pan[0] = x
+      this.pan[1] = y
 
       sfx.nav()
     },
@@ -95,7 +93,7 @@ export const usePxStore = defineStore('main', {
     cut() {
       for (let y = 0; y < this.clipboard.length; y++) {
         for (let x = 0; x < this.clipboard.length; x++) {
-          this.clipboard[y][x] = this.px[y + this.pan[1]*viewWidth][x + this.pan[0]*viewHeight]
+          this.clipboard[y][x] = this.px[y + this.pan[1]][x + this.pan[0]]
         }
       }
 
@@ -112,8 +110,8 @@ export const usePxStore = defineStore('main', {
         }
       }
 
-      this.chunkSet(this.pan[0]*viewWidth, this.pan[1]*viewHeight, f)
-      this.socket.emit('chunkSet', this.pan[0]*viewWidth, this.pan[1]*viewHeight, f)
+      this.chunkSet(this.pan[0], this.pan[1], f)
+      this.socket.emit('chunkSet', this.pan[0], this.pan[1], f)
     },
   },
 })
