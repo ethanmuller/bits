@@ -74,10 +74,12 @@ export const sfx = {
   },
   nav(opts) {
     if (opts && opts.short) {
+      navSynth.volume.value = -16;
       navSynth.envelope.decay = 0.01
       navSynth.triggerAttackRelease(1600, "32n");
       navSynth.frequency.rampTo(1300, 0.01)
     } else {
+      navSynth.volume.value = 0;
       navSynth.envelope.decay = 0.02
       navSynth.triggerAttackRelease(300, "32n");
       navSynth.frequency.rampTo(100, 0.02)
