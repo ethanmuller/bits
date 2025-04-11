@@ -22,6 +22,7 @@ const theme = roomData[getLastSegment()].theme
 const store = usePxStore()
 
 const clientsList = ref([])
+const exportWindowOpen = ref(false)
 
 store.$subscribe((mutation, s) => {
   updateCanvas()
@@ -265,7 +266,7 @@ function windowReturn() {
 
 
 <template>
-  <div class="wrapper" style="--editor-bg: red;">
+  <div class="wrapper">
     <div class="status-bar" v-if="store.socket && store.socket.connected && clientsList && clientsList.length">
       <div><span class="indicator positive"></span> Connected</div>
       <div>Users online: {{clientsList.length}}</div>
@@ -297,6 +298,7 @@ function windowReturn() {
           </label>
         </div>
         <Spravigator :theme="theme"/>
+        <button @click="() => exportWindowOpen = true">export</button>
       </div>
     </div>
   </div>
