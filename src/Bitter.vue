@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted, onUnmounted } from 'vue'
+import { reactive, watch, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import Spreditor from './components/Spreditor.vue'
 import Spravigator from './components/Spravigator.vue'
 import { usePxStore } from './stores/PxStore.js'
@@ -29,6 +29,17 @@ store.$subscribe((mutation, s) => {
 })
 
 const clipboardCanvas = ref(null)
+const exportPreviewCanvas = ref(null)
+const exportCtx = ref(null)
+const exportScale = ref(4)
+const exportFg = ref('black')
+const exportBg = ref('white')
+
+watch([exportScale, exportFg, exportBg], function() {
+  nextTick(() => {
+    renderExportPreview()
+  })
+})
 
 const themeSynth = new Tone.PolySynth().toDestination();
 themeSynth.set({
@@ -72,6 +83,7 @@ onMounted(async () => {
   await store.initializeSocket();
 
   state.ctx = clipboardCanvas.value.getContext('2d')
+  exportCtx.value = exportPreviewCanvas.value.getContext('2d')
 
   setupSocketEvents();
 
@@ -261,44 +273,155 @@ function windowReturn() {
   })
 }
 
+function openExportWindow() {
+  exportWindowOpen.value = true
+  window.scrollTo(0,0)
+  renderExportPreview()
+}
+
+function renderExportPreview() {
+  exportCtx.value.scale(exportScale.value, exportScale.value)
+
+  exportCtx.value.clearRect(0,0, imageWidth,imageHeight)
+
+  exportCtx.value.fillStyle = exportBg.value
+  exportCtx.value.fillRect(0,0,imageWidth,imageHeight)
+
+  exportCtx.value.fillStyle = exportFg.value
+  for (let y = 0; y < imageHeight; y++) {
+    for (let x = 0; x < imageWidth; x++) {
+      const v = store.px[y][x]
+      if (v === 1) {
+        exportCtx.value.fillRect(x,y,1,1)
+      }
+    }
+  }
+  // Reset the scale
+  exportCtx.value.setTransform(1, 0, 0, 1, 0, 0)
+}
+
+function closeExportWindow() {
+  exportWindowOpen.value = false
+}
+
+function getFormattedTimestamp() {
+  const now = new Date();
+
+  const pad = (n) => String(n).padStart(2, '0');
+
+  const year = now.getFullYear();
+  const month = pad(now.getMonth() + 1); // Months are 0-indexed
+  const day = pad(now.getDate());
+  const hours = pad(now.getHours());
+  const minutes = pad(now.getMinutes());
+  const seconds = pad(now.getSeconds());
+
+  return `${year}-${month}-${day}--${hours}_${minutes}_${seconds}`;
+}
+
+function downloadPng() {
+  const imageURL = exportPreviewCanvas.value.toDataURL('image/png');
+  const link = document.createElement('a');
+  link.href = imageURL;
+  link.download = `bitter-${getFormattedTimestamp()}@${exportScale.value}x.png`;
+  link.click()
+}
 
 </script>
 
 
 <template>
   <div class="wrapper">
-    <div class="status-bar" v-if="store.socket && store.socket.connected && clientsList && clientsList.length">
-      <div><span class="indicator positive"></span> Connected</div>
-      <div>Users online: {{clientsList.length}}</div>
-    </div>
-    <div class="status-bar" v-else>
-      <div><span class="indicator warning"></span> Connecting...</div>
-    </div>
-    <div :style="{ opacity: store.socket && store.socket.connected ? 1 : 0.25, transition: 'all 500ms ease-out'}">
-      <Spreditor tone="Tone" :theme="theme" width="9" height="9" />
-      <div class="toolbar">
-
-        <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
-        <button class="neo-btn toolbar-btn rando-btn" @click="randomize"><span class="neo-btn__inner">🎲</span></button>
-        <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></span></button>
-        <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getViewedChunk())"><span class="neo-btn__inner">✂️</span></button>
-        <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
-          <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: theme.hl }" class="neo-btn__inner"></canvas>
-        </button>
+    <div v-show="exportWindowOpen" class="export-window dialog-window">
+      <button @click="closeExportWindow" class="dialog-window__close-button" aria-label="close">&times;</button>
+      <div class="export-window__canvas-wrapper">
+        <canvas ref="exportPreviewCanvas" :width="imageWidth*exportScale" :height="imageHeight*exportScale" class="export-canvas"></canvas>
       </div>
-      <div class="navigator">
-        <div class="arrows">
-          <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="shiftPan(-1, 0)"><span class="neo-btn__inner">←</span></button>
-          <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="shiftPan(0, 1)"><span class="neo-btn__inner">↓</span></button>
-          <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="shiftPan(0, -1)"><span class="neo-btn__inner">↑</span></button>
-          <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="shiftPan(1, 0)"><span class="neo-btn__inner">→</span></button>
-          <label class="tr jump-ctrl">
-            <input type="checkbox" v-model="store.panJump" />
-            🦘
-          </label>
+      <div class="dialog-window__actions">
+        <div class="radio-button-group">
+          <h2>bg color</h2>
+          <div>
+            <label>
+              <input type="radio" value="white" name="exportBg" v-model="exportBg" />
+              white
+            </label>
+            <label>
+              <input type="radio" value="transparent" name="exportBg" v-model="exportBg" />
+              transparent
+            </label>
+          </div>
         </div>
-        <Spravigator :theme="theme"/>
-        <button @click="() => exportWindowOpen = true">export</button>
+        <div class="radio-button-group">
+          <h2>bit color</h2>
+          <div>
+            <label>
+              <input type="radio" value="black" name="exportFg" v-model="exportFg" />
+              black
+            </label>
+            <label>
+              <input type="radio" :value="theme.fg" name="exportFg" v-model="exportFg" />
+              room color
+            </label>
+          </div>
+        </div>
+        <div class="radio-button-group">
+          <h2>scale</h2>
+          <div>
+            <label>
+              <input type="radio" value="1" name="exportScale" v-model="exportScale" />
+              &times;1
+            </label>
+            <label>
+              <input type="radio" value="2" name="exportScale" v-model="exportScale" />
+              &times;2
+            </label>
+            <label>
+              <input type="radio" value="4" name="exportScale" v-model="exportScale" />
+              &times;4
+            </label>
+            <label>
+              <input type="radio" value="8" name="exportScale" v-model="exportScale" />
+              &times;8
+            </label>
+          </div>
+        </div>
+        <button @click="downloadPng" class="neo-btn neo-btn--auto">💾 Download PNG</button>
+      </div>
+    </div>
+    <div :style="{ opacity: !exportWindowOpen ? 1 : 0.25, transition: 'all 500ms ease-out'}">
+      <div class="status-bar" v-if="store.socket && store.socket.connected && clientsList && clientsList.length">
+        <div><span class="indicator positive"></span> Connected</div>
+        <div>Users online: {{clientsList.length}}</div>
+      </div>
+      <div class="status-bar" v-else>
+        <div><span class="indicator warning"></span> Connecting...</div>
+      </div>
+      <div :style="{ opacity: store.socket && store.socket.connected ? 1 : 0.25, transition: 'all 500ms ease-out'}">
+        <Spreditor tone="Tone" :theme="theme" width="9" height="9" />
+        <div class="toolbar">
+
+          <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
+          <button class="neo-btn toolbar-btn rando-btn" @click="randomize"><span class="neo-btn__inner">🎲</span></button>
+          <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></span></button>
+          <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getViewedChunk())"><span class="neo-btn__inner">✂️</span></button>
+          <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
+            <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: theme.hl }" class="neo-btn__inner"></canvas>
+          </button>
+        </div>
+        <div class="navigator">
+          <div class="arrows">
+            <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="shiftPan(-1, 0)"><span class="neo-btn__inner">←</span></button>
+            <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="shiftPan(0, 1)"><span class="neo-btn__inner">↓</span></button>
+            <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="shiftPan(0, -1)"><span class="neo-btn__inner">↑</span></button>
+            <button class="neo-btn br arrow-btn arrow-btn--horizontal" @click="shiftPan(1, 0)"><span class="neo-btn__inner">→</span></button>
+            <label class="tr jump-ctrl">
+              <input type="checkbox" name="panJump" v-model="store.panJump" />
+              🦘
+            </label>
+          </div>
+          <Spravigator :theme="theme"/>
+          <button @click="openExportWindow" class="neo-btn export-button">💾</button>
+        </div>
       </div>
     </div>
   </div>
@@ -310,6 +433,7 @@ function windowReturn() {
 .wrapper {
   max-width: 480px;
   margin: 0 auto;
+  position: relative;
 }
 
 .toolbar {
@@ -336,7 +460,7 @@ function windowReturn() {
   grid-auto-rows: 48px;
   grid-template-columns: 48px 48px 48px;
   grid-template-areas: "tl t tr"
-                       "bl b br";
+    "bl b br";
   min-height: 5em;
   position: relative;
   z-index: 1;
@@ -349,12 +473,12 @@ function windowReturn() {
 .arrows .bl {
   grid-area: bl;
   position: relative;
-    z-index: 2;
+  z-index: 2;
 }
 .arrows .b {
   grid-area: b;
   position: relative;
-    z-index: 1;
+  z-index: 1;
 }
 .arrows .br {
   grid-area: br;
@@ -386,6 +510,11 @@ function windowReturn() {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.neo-btn--auto {
+  padding: 9px 16px;
+  width: auto;
+  height: auto;
 }
 .neo-btn:hover {
   transition-duration: 0.3s;
@@ -466,13 +595,98 @@ function windowReturn() {
   height: 0.5rem;
 }
 .indicator.positive {
-    background: green;
+  background: green;
 }
 .indicator.warning {
-    background: #ffc800;;
+  background: #ffc800;;
 }
 .status-text {
   opacity: 0.5;
 }
 
+.export-window {
+  box-sizing: border-box;
+  position: absolute;
+  background: white;
+  padding: 2rem 3rem;
+  z-index: 3;
+  width: 95%;
+  left: 2.5%;
+  top: 2.5%;
+  border-radius: 12px;
+  box-shadow: 10px 10px 40px rgba(0,0,0,0.1),
+    5px 5px 20px rgba(0,0,0,0.3);
+}
+.export-canvas {
+  box-sizing: border-box;
+  image-rendering: pixelated;
+  max-width: 100%;
+}
+
+.export-window__canvas-wrapper {
+  aspect-ratio: 5/4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image:
+    linear-gradient(45deg, #ccc 25%, transparent 25%), 
+    linear-gradient(135deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(135deg, #eee 75%, #ccc 75%);
+  background-size:25px 25px; /* Must be a square */
+  background-position:0 0, 12.5px 0, 12.5px -12.5px, 0px 12.5px; /* Must be half of one side of the square */
+    margin-bottom: 1rem;
+
+}
+
+.dialog-window {
+  display: flex;
+  flex-direction: column;
+  font-family: monospace;
+}
+
+.dialog-window__close-button {
+  align-self: end;
+  border: none;
+  background: transparent;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.dialog-window__actions {
+  margin-top: auto;
+}
+
+.dialog-window__actions button {
+  margin-top: 2em;
+    margin-left: auto;
+}
+
+.export-button {
+  grid-column: 2;
+  justify-self: end;
+  margin-top: 0.25em;
+}
+
+.radio-button-group {
+  display: grid;
+  grid-template-columns: 6rem auto;
+    justify-content: space-between;
+  border: none;
+  padding: 0;
+    margin: 0;
+}
+.radio-button-group h2 {
+  font-size: inherit;
+  font-weight: normal;
+}
+.radio-button-group > div {
+  display: flex;
+}
+
+.radio-button-group label {
+  display: block;
+  padding: 0.5em 0;
+    margin-right: 1em;
+}
 </style>
