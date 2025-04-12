@@ -339,7 +339,7 @@ function downloadPng() {
       </div>
       <div class="dialog-window__actions">
         <div class="radio-button-group">
-          <h2>bg color</h2>
+          <h2>background</h2>
           <div>
             <label>
               <input type="radio" value="white" name="exportBg" v-model="exportBg" />
@@ -366,22 +366,18 @@ function downloadPng() {
         </div>
         <div class="radio-button-group">
           <h2>scale</h2>
-          <div>
+          <div class="flex">
             <label>
-              <input type="radio" value="1" name="exportScale" v-model="exportScale" />
-              &times;1
+              <input type="radio" value="1" name="exportScale" v-model="exportScale" />&times;1
             </label>
             <label>
-              <input type="radio" value="2" name="exportScale" v-model="exportScale" />
-              &times;2
+              <input type="radio" value="2" name="exportScale" v-model="exportScale" />&times;2
             </label>
             <label>
-              <input type="radio" value="4" name="exportScale" v-model="exportScale" />
-              &times;4
+              <input type="radio" value="4" name="exportScale" v-model="exportScale" />&times;4
             </label>
             <label>
-              <input type="radio" value="8" name="exportScale" v-model="exportScale" />
-              &times;8
+              <input type="radio" value="8" name="exportScale" v-model="exportScale" />&times;8
             </label>
           </div>
         </div>
@@ -420,7 +416,7 @@ function downloadPng() {
             </label>
           </div>
           <Spravigator :theme="theme"/>
-          <button @click="openExportWindow" class="neo-btn export-button">💾</button>
+          <button @click="openExportWindow" class="neo-btn export-button">📸</button>
         </div>
       </div>
     </div>
@@ -500,8 +496,11 @@ function downloadPng() {
 
   font-family: inherit;
   border: none;
-  width: 36px;
-  height: 36px;
+
+  width: 48px;
+  height: 48px;
+
+  border-radius: 9px;
   border-radius: 9px;
   background: #eee;
   transition: .7s all ease-out;
@@ -511,11 +510,13 @@ function downloadPng() {
   align-items: center;
   justify-content: center;
 }
+
 .neo-btn--auto {
-  padding: 9px 16px;
+  padding: 18px 16px;
   width: auto;
   height: auto;
 }
+
 .neo-btn:hover {
   transition-duration: 0.3s;
   background: #f3f3f3;
@@ -545,11 +546,6 @@ function downloadPng() {
 }
 
 .toolbar-btn {
-
-  width: 48px;
-  height: 48px;
-
-  border-radius: 9px;
 }
 
 .arrow-btn {
@@ -671,22 +667,30 @@ function downloadPng() {
 .radio-button-group {
   display: grid;
   grid-template-columns: 6rem auto;
-    justify-content: space-between;
   border: none;
   padding: 0;
-    margin: 0;
+  margin: 0 0 1rem;
+}
+
+.radio-button-group h2 {
+  margin: 0.4rem 0;
+}
+
+.radio-button-group input[type="radio"] {
+  margin: 0 0.25rem 0 0.5rem;
 }
 .radio-button-group h2 {
   font-size: inherit;
   font-weight: normal;
 }
-.radio-button-group > div {
+.radio-button-group > .flex {
   display: flex;
+  gap: 0.05rem;
 }
 
 .radio-button-group label {
-  display: block;
+  display: flex;
+  align-items: center;
   padding: 0.5em 0;
-    margin-right: 1em;
 }
 </style>
