@@ -28,10 +28,6 @@
     <nav>
       <div v-for="room in Object.entries(roomData)">
         <RouterLink :to="room[0]">
-          <div class="swatch" :style="{ background: room[1].theme.bg }">
-            <span :style="{ background: room[1].theme.fg }"></span>
-            <span :style="{ background: room[1].theme.hl }"></span>
-          </div>
           <span>{{room[1].name}}</span>
           <span class="info">👤 {{roomStatus[room[0]]}}</span>
         </RouterLink>
@@ -53,7 +49,7 @@ nav {
 
 nav a {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   gap: 1em;
   align-items: center;
   padding: 2rem 2rem;
@@ -89,40 +85,4 @@ nav .info {
   color: #777;
 }
 
-.swatch {
-  display: flex;
-  background: transparent;
-  border: none;
-  color: inherit;
-  font: inherit;
-  padding: 0;
-
-  width: 2rem;
-  height: 2rem;
-
-  margin: 0.5em;
-}
-.swatch span {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  transition: all 100ms;
-  transform-origin: 50% 50%;
-}
-
-.swatch span:nth-child(1) {
-  z-index: 1;
-}
-
-.swatch span:nth-child(2) {
-  transform: translate3d(0, 100%, 0);
-}
-
-.swatch .selected span:nth-child(1) {
-  transform: translate3d(50%, 50%, 0);
-}
-
-.swatch .selected span:nth-child(2) {
-  transform: translate3d(-50%, 50%, 0) scale(2);
-}
 </style>
