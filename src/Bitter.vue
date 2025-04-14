@@ -17,7 +17,8 @@ const getLastSegment = () => {
   return segments.pop();
 };
 
-const theme = roomData[getLastSegment()].theme
+const room = roomData[getLastSegment()]
+const theme = room.theme
 
 const store = usePxStore()
 
@@ -386,7 +387,7 @@ function downloadPng() {
     </div>
     <div :style="{ opacity: !exportWindowOpen ? 1 : 0.25, transition: 'all 500ms ease-out'}">
       <div class="status-bar" v-if="store.socket && store.socket.connected && clientsList && clientsList.length">
-        <div><span class="indicator positive"></span> Connected</div>
+        <div><span class="indicator positive"></span> Connected to <strong>{{room.name}}</strong></div>
         <div>Users online: {{clientsList.length}}</div>
       </div>
       <div class="status-bar" v-else>
