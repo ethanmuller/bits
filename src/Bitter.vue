@@ -165,7 +165,38 @@ function invert() {
   store.chunkSet(store.pan[0], store.pan[1], chunk)
   store.socket.emit('chunkSet', store.pan[0], store.pan[1], chunk)
 
-  store.i = (store.i + 1) % 2
+  store.invertFlip = (store.invertFlip + 1) % 2
+  sfx.bwip()
+  store.socket.emit('sfx', 'bwip')
+}
+
+function xFlip() {
+  const chunk = getViewedChunk()
+
+  const height = chunk.length
+
+  for (let y = 0; y < height; y++) {
+    chunk[y].reverse()
+  }
+
+  store.chunkSet(store.pan[0], store.pan[1], chunk)
+  store.socket.emit('chunkSet', store.pan[0], store.pan[1], chunk)
+
+  store.xFlip = (store.xFlip + 1) % 2
+  sfx.bwip()
+  store.socket.emit('sfx', 'bwip')
+}
+
+function yFlip() {
+  const chunk = getViewedChunk()
+
+
+  chunk.reverse()
+
+  store.chunkSet(store.pan[0], store.pan[1], chunk)
+  store.socket.emit('chunkSet', store.pan[0], store.pan[1], chunk)
+
+  store.yFlip = (store.yFlip + 1) % 2
   sfx.bwip()
   store.socket.emit('sfx', 'bwip')
 }
@@ -258,7 +289,7 @@ function setupSocketEvents() {
   })
 
   store.socket.on('player list', (list) => {
-    //clientsList.value = list.filter((i) => i !== store.socket.id)
+    //clientsList.value = list.filter((invertFlip) => invertFlip !== store.socket.id)
     clientsList.value = list
   })
 }
@@ -398,8 +429,10 @@ function downloadPng() {
         <div class="toolbar">
 
           <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
+          <button class="neo-btn toolbar-btn rando-btn" @click="xFlip"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `scaleX(${ 1 + -2 * store.xFlip }) rotate(75deg)` }">🩴</span></span></button>
+          <button class="neo-btn toolbar-btn rando-btn" @click="yFlip"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `scaleY(${ 1 + -2 * store.yFlip }) rotate(-10deg)` }">🩴</span></span></button>
           <button class="neo-btn toolbar-btn rando-btn" @click="randomize"><span class="neo-btn__inner">🎲</span></button>
-          <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.i }deg)` }">🌓</span></span></button>
+          <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.invertFlip }deg)` }">🌓</span></span></button>
           <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getViewedChunk())"><span class="neo-btn__inner">✂️</span></button>
           <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
             <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: theme.hl }" class="neo-btn__inner"></canvas>

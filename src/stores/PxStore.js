@@ -33,8 +33,10 @@ export const usePxStore = defineStore('main', {
       clipboard: createEmptyGrid(viewWidth, viewHeight),
       socket: null,
       pan: [0,0],
-      panJump: false,
-      i: 0,
+      panJump: true,
+      invertFlip: 0,
+      xFlip: 0,
+      yFlip: 0,
       room: getLastSegment(route.path),
     }
   },
