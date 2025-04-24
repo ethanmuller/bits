@@ -201,6 +201,28 @@ function yFlip() {
   store.socket.emit('sfx', 'bwip')
 }
 
+function rotate90_clockwise() {
+  const chunk = getViewedChunk()
+
+  const rows = chunk.length;
+  const cols = chunk[0].length;
+  const rotatedChunk = [];
+  for (let j = 0; j < cols; j++) {
+    rotatedChunk[j] = [];
+    for (let i = rows - 1; i >= 0; i--) {
+      rotatedChunk[j].push(chunk[i][j]);
+    }
+  }
+
+  store.chunkSet(store.pan[0], store.pan[1], rotatedChunk)
+  store.socket.emit('chunkSet', store.pan[0], store.pan[1], rotatedChunk)
+
+  store.rotateFlip = (store.rotateFlip + 1) % 4
+  sfx.bwip()
+  store.socket.emit('sfx', 'bwip')
+}
+
+
 function getViewedChunk() {
   const chunk = store.px.slice(store.pan[1], store.pan[1]+9)
 
@@ -429,6 +451,7 @@ function downloadPng() {
         <div class="toolbar">
 
           <!--<button class="clear-btn" @click="clearAll">clear all</button>-->
+          <button class="neo-btn toolbar-btn rando-btn" @click="rotate90_clockwise"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${store.rotateFlip * 90}deg)` }">⤵</span></span></button>
           <button class="neo-btn toolbar-btn rando-btn" @click="xFlip"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `scaleX(${ 1 + -2 * store.xFlip }) rotate(75deg)` }">🩴</span></span></button>
           <button class="neo-btn toolbar-btn rando-btn" @click="yFlip"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `scaleY(${ 1 + -2 * store.yFlip }) rotate(-10deg)` }">🩴</span></span></button>
           <button class="neo-btn toolbar-btn rando-btn" @click="randomize"><span class="neo-btn__inner">🎲</span></button>

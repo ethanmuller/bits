@@ -37,6 +37,7 @@ export const usePxStore = defineStore('main', {
       invertFlip: 0,
       xFlip: 0,
       yFlip: 0,
+      rotateFlip: 0,
       room: getLastSegment(route.path),
     }
   },
