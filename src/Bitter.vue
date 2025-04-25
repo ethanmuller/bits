@@ -515,7 +515,7 @@ function downloadPng() {
           </button>
         </div>
         <div class="navigator">
-          <div class="arrows">
+          <div class="tool-grid" :style="{ '--arrow-size': store.panJump ? '1.75em' : '0.9em' }">
             <button class="neo-btn bl arrow-btn arrow-btn--horizontal" @click="shiftPan(-1, 0)"><span class="neo-btn__inner">←</span></button>
             <button class="neo-btn b arrow-btn arrow-btn--vertical" @click="shiftPan(0, 1)"><span class="neo-btn__inner">↓</span></button>
             <button class="neo-btn t arrow-btn arrow-btn--vertical" @click="shiftPan(0, -1)"><span class="neo-btn__inner">↑</span></button>
@@ -560,7 +560,7 @@ function downloadPng() {
   align-items: end;
 }
 
-.arrows {
+.tool-grid {
   padding: 0 0.5rem;
   display: grid;
   grid-auto-rows: 48px;
@@ -573,23 +573,23 @@ function downloadPng() {
   gap: 0.5rem;
 }
 
-.arrows .t {
+.tool-grid .t {
   grid-area: t;
 }
-.arrows .bl {
+.tool-grid .bl {
   grid-area: bl;
   position: relative;
   z-index: 2;
 }
-.arrows .b {
+.tool-grid .b {
   grid-area: b;
   position: relative;
   z-index: 1;
 }
-.arrows .br {
+.tool-grid .br {
   grid-area: br;
 }
-.arrows .tr {
+.tool-grid .tr {
   grid-area: tr;
 }
 .jump-ctrl {
@@ -661,7 +661,7 @@ function downloadPng() {
 .arrow-btn {
   flex: 1;
   color: #666;
-  font-size: 1.5em;
+  font-size: var(--arrow-size);
   font-weight: bold;
 
   line-height: 0;
@@ -669,6 +669,14 @@ function downloadPng() {
   width: 100%;
   height: 100%;
 
+}
+
+.bl span, .br span {
+  /*
+     i hate this, but I can't figure out how
+     to get the arrows aligned otherwise
+  */
+  margin-top: -0.25em;
 }
 
 .cut-btn {
