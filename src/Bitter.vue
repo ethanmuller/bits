@@ -170,6 +170,58 @@ function invert() {
   store.socket.emit('sfx', 'bwip')
 }
 
+function life() {
+  const chunk = getViewedChunk()
+  const height = chunk.length
+  const width = chunk[0].length
+  
+  // Create a copy of the current state to calculate the next generation
+  const nextGen = Array(height).fill().map(() => Array(width).fill(0))
+  
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      // Count live neighbors, including wrap-around
+      let liveNeighbors = 0
+      
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          // Skip the cell itself
+          if (dx === 0 && dy === 0) continue
+          
+          // Calculate neighbor coordinates with wrap-around
+          const nx = (x + dx + width) % width
+          const ny = (y + dy + height) % height
+          
+          // Add to live neighbor count if the neighbor is alive
+          liveNeighbors += chunk[ny][nx] ? 1 : 0
+        }
+      }
+      
+      // Apply Conway's Game of Life rules
+      if (chunk[y][x]) {
+        // Cell is currently alive
+        nextGen[y][x] = (liveNeighbors === 2 || liveNeighbors === 3) ? 1 : 0
+      } else {
+        // Cell is currently dead
+        nextGen[y][x] = (liveNeighbors === 3) ? 1 : 0
+      }
+    }
+  }
+  
+  // Update the chunk with the next generation
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      chunk[y][x] = nextGen[y][x]
+    }
+  }
+  
+  // Store and emit the updated chunk
+  store.chunkSet(store.pan[0], store.pan[1], chunk)
+  store.socket.emit('chunkSet', store.pan[0], store.pan[1], chunk)
+  sfx.bwip()
+  store.socket.emit('sfx', 'bwip')
+}
+
 function xFlip() {
   const chunk = getViewedChunk()
 
@@ -454,8 +506,9 @@ function downloadPng() {
           <button class="neo-btn toolbar-btn rando-btn" @click="rotate90_clockwise"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${store.rotateFlip * 90}deg)` }">⤵</span></span></button>
           <button class="neo-btn toolbar-btn rando-btn" @click="xFlip"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `scaleX(${ 1 + -2 * store.xFlip }) rotate(75deg)` }">🩴</span></span></button>
           <button class="neo-btn toolbar-btn rando-btn" @click="yFlip"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `scaleY(${ 1 + -2 * store.yFlip }) rotate(-10deg)` }">🩴</span></span></button>
-          <button class="neo-btn toolbar-btn rando-btn" @click="randomize"><span class="neo-btn__inner">🎲</span></button>
           <button class="neo-btn toolbar-btn invert-btn" @click="invert"><span class="neo-btn__inner"><span :style="{ display: 'inline-block', transform: `rotate(${ 180 * store.invertFlip }deg)` }">🌓</span></span></button>
+          <button class="neo-btn toolbar-btn rando-btn" @click="randomize"><span class="neo-btn__inner">🎲</span></button>
+          <button class="neo-btn toolbar-btn life-btn" @click="life"><span class="neo-btn__inner">🦠</span></button>
           <button class="neo-btn toolbar-btn cut-btn" @click="cut" :disabled="isChunkEmpty(getViewedChunk())"><span class="neo-btn__inner">✂️</span></button>
           <button class="neo-btn toolbar-btn clipboard-btn" @click="paste">
             <canvas ref="clipboardCanvas" width="9" height="9" :style="{ background: theme.hl }" class="neo-btn__inner"></canvas>
@@ -622,6 +675,12 @@ function downloadPng() {
   margin-left: auto;
   margin-right: 0;
   z-index: 1;
+}
+
+.life-btn img {
+  image-rendering: pixelated;
+  width: 36px;
+  height: 36px;
 }
 
 .toolbar button:disabled {
